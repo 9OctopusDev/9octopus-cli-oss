@@ -17,6 +17,7 @@
 	],
 	"dependencies": {
 		"@auth0/auth0-spa-js": "^2.4.1",
+		"@inkkit/ink-markdown": "^1.0.0",
 		"@types/eventsource": "^1.1.15",
 		"cli-spinners": "^3.2.0",
 		"dedent": "^1.6.0",
