@@ -19,4 +19,5 @@ export type ConversationMessage = {
     timestamp: Date;
     toolCalls?: ToolCall[];
     tokenUsage?: TokenUsage;
+    type?: 'text' | 'welcome';
 };

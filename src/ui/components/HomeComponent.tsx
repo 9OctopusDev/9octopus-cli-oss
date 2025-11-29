@@ -34,4 +34,4 @@ const HomeComponent: React.FC = () => {
     );
 };
 
-export default HomeComponent;
+export default React.memo(HomeComponent);

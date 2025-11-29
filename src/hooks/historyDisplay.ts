@@ -11,7 +11,15 @@ type useHistoryDisplayProps = {
 };
 
 const useHistoryDisplay = (): useHistoryDisplayProps => {
-    const [history, setHistory] = useState<ConversationMessage[]>([]);
+    const [history, setHistory] = useState<ConversationMessage[]>([
+        {
+            id: 'welcome',
+            role: 'system',
+            content: '',
+            timestamp: new Date(),
+            type: 'welcome'
+        }
+    ]);
 
     const addHistoryItem = useCallback(
         (
@@ -28,7 +36,13 @@ const useHistoryDisplay = (): useHistoryDisplayProps => {
 
 
     const clearHistory = useCallback(() => {
-        setHistory([]);
+        setHistory([{
+            id: 'welcome',
+            role: 'system',
+            content: '',
+            timestamp: new Date(),
+            type: 'welcome'
+        }]);
     }, []);
 
     return {

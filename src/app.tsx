@@ -1,6 +1,5 @@
 
 import React, { useEffect, useState } from 'react';
-import HomeComponent from './ui/components/HomeComponent.js';
 import HistoryComponent from './ui/components/HistoryComponent.js';
 import { Box, Text } from 'ink';
 import useHistoryDisplay from './hooks/historyDisplay.js';
@@ -146,10 +145,13 @@ export default function App() {
 
 	return (
 		<>
-			<Box flexDirection="column">
-				<HomeComponent />
+			{/* Static History Log - Prints once and scrolls up */}
+			{!pendingTool && !showModelSelection && !authState.isAuthenticating && (
 				<HistoryComponent history={history} />
+			)}
 
+			{/* Dynamic UI Area - Stays at the bottom */}
+			<Box flexDirection="column">
 				{/* Dialogs - displayed inline below history */}
 				{pendingTool && (
 					<ToolRequestComponent
@@ -182,15 +184,17 @@ export default function App() {
 					/>
 				)}
 
-				<InputProvider>
-					<InputComponent
-						addHistoryItem={addHistoryItem}
-						commandAgregator={commandAgregator}
-						sessionManager={sessionManager}
-						modelManager={modelManager}
-						clearHistory={clearHistory}
-					/>
-				</InputProvider>
+				{!pendingTool && !showModelSelection && !authState.isAuthenticating && (
+					<InputProvider>
+						<InputComponent
+							addHistoryItem={addHistoryItem}
+							commandAgregator={commandAgregator}
+							sessionManager={sessionManager}
+							modelManager={modelManager}
+							clearHistory={clearHistory}
+						/>
+					</InputProvider>
+				)}
 
 				<Text>{'\n'}</Text>
 			</Box>
