@@ -11,9 +11,8 @@ export class UpgradeCommand implements SlashCommand {
 	async action(_args: string[], context?: any): Promise<void> {
 		const upgradeUrl = 'https://app.9octopus.com/profile';
 
-		context?.addHistoryItem(
-			'Upgrade Information',
-			`# 🚀 Upgrade Your Plan
+
+		let output = `# Upgrade Your Plan
 
 **Unlock More Features:**
 - Access to all AI models including Claude-3.5-Sonnet
@@ -23,9 +22,14 @@ export class UpgradeCommand implements SlashCommand {
 
 **Visit:** ${upgradeUrl}
 
-To open the upgrade page, copy and paste the URL above into your browser.`,
-			'text',
-		);
+To open the upgrade page, copy and paste the URL above into your browser.`
+
+		context?.addHistoryItem({
+			id: new Date().toLocaleDateString(),
+			role: 'system',
+			content: output,
+			timestamp: new Date(),
+		});
 
 		// In a real implementation, you might want to automatically open the URL
 		// using a system command like 'open' on macOS or 'xdg-open' on Linux

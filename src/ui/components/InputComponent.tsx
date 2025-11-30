@@ -20,7 +20,7 @@ type InputComponentProps = {
     sessionManager: SessionManager;
     modelManager: ModelManager;
     clearHistory: () => void;
-
+    setLoading: (state: boolean) => void;
 };
 
 const InputComponent: React.FC<InputComponentProps> = ({
@@ -28,7 +28,8 @@ const InputComponent: React.FC<InputComponentProps> = ({
     commandAgregator,
     sessionManager,
     modelManager,
-    clearHistory
+    clearHistory,
+    setLoading
 }) => {
 
     const { setTypingState } = useInputContext();
@@ -265,6 +266,7 @@ const InputComponent: React.FC<InputComponentProps> = ({
 
 
     const handleSubmit = async (input: string) => {
+
         // Add to command history if not empty and not duplicate of last command
         if (input.trim() && (commandHistory.length === 0 || commandHistory[commandHistory.length - 1] !== input.trim())) {
             setCommandHistory(prev => [...prev, input.trim()]);
@@ -294,6 +296,7 @@ const InputComponent: React.FC<InputComponentProps> = ({
                     await command.action(input.trim().slice(1).split(' ').slice(1), {
                         addHistoryItem,
                         clearHistory,
+                        setLoading
                     });
                 } catch (error) {
 
@@ -301,6 +304,7 @@ const InputComponent: React.FC<InputComponentProps> = ({
             }
         }
         if (isTextInput(input)) {
+            setLoading(true)
             addHistoryItem({
                 id: new Date().toLocaleDateString(),
                 role: 'user',

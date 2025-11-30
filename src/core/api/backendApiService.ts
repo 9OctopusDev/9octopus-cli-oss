@@ -21,9 +21,7 @@ export class BackendApiService {
 	) => void;
 	private setToolRequest: (request: ToolExecutionRequest) => void;
 	private onStatusUpdate: (
-		isWorking: boolean,
 		message: string,
-		type: 'thinking' | 'tool' | 'completing' | 'idle',
 	) => void;
 	private onTokenUsageUpdate: (tokenUsage: TokenUsage) => void;
 	private currentStream: ReadableStreamDefaultReader<Uint8Array> | null = null;
@@ -56,7 +54,6 @@ export class BackendApiService {
 		onUpdateCallback: (
 			action: string,
 			details?: string | undefined,
-			type?: 'text' | 'code' | 'command' | undefined,
 		) => void,
 	) {
 		this.onUpdateCallback = onUpdateCallback;
@@ -70,9 +67,7 @@ export class BackendApiService {
 
 	setStatusUpdateCallback(
 		onStatusUpdate: (
-			isWorking: boolean,
 			message: string,
-			type: 'thinking' | 'tool' | 'completing' | 'idle',
 		) => void,
 	) {
 		this.onStatusUpdate = onStatusUpdate;
@@ -136,7 +131,7 @@ export class BackendApiService {
 
 
 			// Set initial thinking status
-			this.onStatusUpdate(true, 'Processing request...', 'thinking');
+			this.onStatusUpdate('');
 
 			const headers = await this.getAuthHeaders();
 			headers['Accept'] = 'text/event-stream';
@@ -180,7 +175,7 @@ export class BackendApiService {
 		} catch (error) {
 
 			// Clear the loading state when there's an error
-			this.onStatusUpdate(false, '', 'idle');
+			this.onStatusUpdate('');
 			const networkError = NetworkErrorUtils.fromError(error);
 			throw new Error(
 				`Failed to start conversation: ${networkError.getUserMessage()}`,
@@ -272,7 +267,7 @@ export class BackendApiService {
 		} catch (error) {
 
 			// Clear the loading state when there's an error
-			this.onStatusUpdate(false, '', 'idle');
+			this.onStatusUpdate('');
 			const networkError = NetworkErrorUtils.fromError(error);
 			throw new Error(
 				`Failed to submit tool results: ${networkError.getUserMessage()}`,
@@ -319,7 +314,7 @@ export class BackendApiService {
 			if (error.name !== 'AbortError') {
 
 				// Clear the loading state when there's a stream error
-				this.onStatusUpdate(false, '', 'idle');
+				this.onStatusUpdate('');
 				throw error;
 			}
 		} finally {
@@ -365,20 +360,6 @@ export class BackendApiService {
 	}
 
 	/**
-	 * Convert tool names to user-friendly display names
-	 */
-	private getToolDisplayName(toolName: string): string {
-		const toolDisplayNames: Record<string, string> = {
-			shell: 'shell command',
-			'read-file': 'file',
-			'write-file': 'file',
-			search: 'search',
-		};
-
-		return toolDisplayNames[toolName] || toolName;
-	}
-
-	/**
 	 * Handle token usage updates from SSE events
 	 */
 	private handleTokenUsageUpdate(tokenUsage: any): void {
@@ -409,14 +390,12 @@ export class BackendApiService {
 				}
 
 				// Set status to idle when we get the final response
-				this.onStatusUpdate(false, '', 'idle');
+				this.onStatusUpdate('');
 				break;
 
 			case 'tool_call':
 
-				// Update status to show specific tool being requested
-				const toolName = this.getToolDisplayName(event.parsedData.name);
-				this.onStatusUpdate(true, `Running ${toolName}...`, 'tool');
+				this.onStatusUpdate('');
 
 				if (event.parsedData.token_usage) {
 					this.handleTokenUsageUpdate(event.parsedData.token_usage);
@@ -433,7 +412,7 @@ export class BackendApiService {
 			case 'done':
 
 				// Set status to idle when conversation is complete
-				this.onStatusUpdate(false, '', 'idle');
+				this.onStatusUpdate('');
 				break;
 
 			case 'error':

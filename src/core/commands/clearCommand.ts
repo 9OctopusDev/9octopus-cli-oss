@@ -25,19 +25,21 @@ export class ClearCommand implements SlashCommand {
 
 			// Reconnect WebSocket with new session
 
-			addHistoryItem(
-				'Session Reset',
-				`New session started! Previous session: ${oldSessionId}, New session: ${newSession.sessionId.slice(
+			addHistoryItem({
+				id: new Date().toLocaleDateString(),
+				role: 'system',
+				content: `New session started! Previous session: ${oldSessionId}, New session: ${newSession.sessionId.slice(
 					-8,
 				)}`,
-				'command',
-			);
+				timestamp: new Date()
+			});
 		} catch (error) {
-			addHistoryItem(
-				'Clear Error',
-				`Failed to start new session: ${error}`,
-				'text',
-			);
+			addHistoryItem({
+				id: new Date().toLocaleDateString(),
+				role: 'system',
+				content: `Failed to start new session: ${error}`,
+				timestamp: new Date(),
+			});
 		}
 	}
 }

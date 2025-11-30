@@ -21,19 +21,30 @@ export class LogoutCommand implements SlashCommand {
 		this.action = this.executeLogout.bind(this);
 	}
 
-	private async executeLogout(_args: string[]): Promise<void> {
+	private async executeLogout(_args: string[], context?: any): Promise<void> {
+		const addHistoryItem = context?.addHistoryItem || console.log;
 		try {
 			// Check if authentication is enabled
 			if (!this.configManager.isAuthEnabled()) {
 
-
+				addHistoryItem({
+					id: new Date().toLocaleDateString(),
+					role: 'system',
+					content: 'Auth is not enabled!',
+					timestamp: new Date(),
+				});
 				return;
 			}
 
 			// Check if user is authenticated
 			const isAuthenticated = await this.authService.isAuthenticated();
 			if (!isAuthenticated) {
-
+				addHistoryItem({
+					id: new Date().toLocaleDateString(),
+					role: 'system',
+					content: 'Authenticated user not found!',
+					timestamp: new Date(),
+				});
 				return;
 			}
 
@@ -43,7 +54,12 @@ export class LogoutCommand implements SlashCommand {
 			// Perform logout
 			await this.authService.logout();
 
-
+			addHistoryItem({
+				id: new Date().toLocaleDateString(),
+				role: 'system',
+				content: 'User Logged out',
+				timestamp: new Date(),
+			});
 
 
 		} catch (error: any) {

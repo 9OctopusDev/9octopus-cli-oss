@@ -5,7 +5,7 @@ import { AuthConfigManager } from "../configs/config.js";
 
 export class LoginCommand implements SlashCommand {
 	name: string = 'login';
-	description: string = 'Authenticate with Auth0 to access the API';
+	description: string = 'Authenticate user to access the API';
 	subcommands: SlashCommandSubCommand[] = [];
 	options: CommandOption[] = [
 		{
@@ -33,8 +33,13 @@ export class LoginCommand implements SlashCommand {
 		try {
 			// Check if authentication is enabled
 			if (!this.configManager.isAuthEnabled()) {
-				addHistoryItem('⚠️  Authentication is disabled (AUTH_ENABLED=false)', '', 'text');
-				addHistoryItem('✅ You can use the CLI without authentication', '', 'text');
+				addHistoryItem({
+					id: new Date().toLocaleDateString(),
+					role: 'system',
+					content: 'Authentication is disabled. You can use the CLI without authentication',
+					timestamp: new Date(),
+				})
+
 				return;
 			}
 
@@ -42,17 +47,13 @@ export class LoginCommand implements SlashCommand {
 			const isAuthenticated = await this.authService.isAuthenticated();
 			if (isAuthenticated) {
 				const user = await this.authService.getCurrentUser();
-				addHistoryItem(
-					`✅ Already authenticated as: ${user?.email || user?.name || 'Unknown user'
-					}`,
-					'',
-					'text'
-				);
-				addHistoryItem(
-					'💡 Use /logout to sign out and login with a different account',
-					'',
-					'text'
-				);
+
+				addHistoryItem({
+					id: new Date().toLocaleDateString(),
+					role: 'system',
+					content: `Already authenticated as: ${user?.email || user?.name || 'Unknown user'}. Use /logout to sign out and login with a different account`,
+					timestamp: new Date(),
+				});
 				return;
 			}
 
@@ -63,26 +64,38 @@ export class LoginCommand implements SlashCommand {
 			await this.authManager.startAuthentication(useBrowserFlow);
 
 			// Show success message
-			addHistoryItem('🚀 You can now use all CLI features', '', 'text');
+			addHistoryItem({
+				id: new Date().toLocaleDateString(),
+				role: 'system',
+				content: 'You can now use all CLI features',
+				timestamp: new Date(),
+			});
 		} catch (error: any) {
 			// Error handling is now done in the authentication manager/dialog
 			// Just show a simple error message in history
-			addHistoryItem(`❌ Authentication failed: ${error.message}`, '', 'text');
+			addHistoryItem({
+				id: new Date().toLocaleDateString(),
+				role: 'system',
+				content: `Authentication failed: ${error.message}`,
+				timestamp: new Date(),
+			});
 
 			if (error.message.includes('timeout')) {
-				addHistoryItem('💡 Try again or use --browser flag for browser flow', '', 'text');
-			} else if (error.message.includes('AUTH0_')) {
-				addHistoryItem(
-					'💡 Please check your Auth0 configuration in environment variables',
-					'',
-					'text'
-				);
+
+				addHistoryItem({
+					id: new Date().toLocaleDateString(),
+					role: 'system',
+					content: 'Try again or use --browser flag for browser flow',
+					timestamp: new Date(),
+				});
 			} else {
-				addHistoryItem(
-					'💡 Run with --browser flag to try browser authorization flow',
-					'',
-					'text'
-				);
+
+				addHistoryItem({
+					id: new Date().toLocaleDateString(),
+					role: 'system',
+					content: 'Run with --browser flag to try browser authorization flow',
+					timestamp: new Date(),
+				});
 			}
 		}
 	}

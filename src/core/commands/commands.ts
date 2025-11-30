@@ -25,17 +25,4 @@ export class CommandAgregator {
 		);
 	}
 
-	// executeCommand(commandName: string, subCommandName: string, args: string[]): void {
-	//     const command = this.searchCommand(commandName);
-	//     if (command) {
-	//         command.action(args);
-	//     }
-	// }
-
-	// executeSubCommand(commandName: string, subCommandName: string, args: string[]): void {
-	//     const subCommand = this.searchSubCommand(commandName, subCommandName);
-	//     if (subCommand) {
-	//         subCommand.action(args);
-	//     }
-	// }
 }

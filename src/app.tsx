@@ -26,6 +26,7 @@ import { ToolExecutionRequest } from './interfaces/tools.js';
 import ToolRequestComponent from './ui/components/ToolRequestDialog.js';
 import ModelSelectionDialog from './ui/components/ModelSelectionDialog.js';
 import AuthenticationDialog from './ui/components/AuthenticationDialog.js';
+import LoadingComponent from './ui/components/LoadingComponent.js';
 
 const commandAgregator = new CommandAgregator();
 const sessionManager = new SessionManager();
@@ -63,6 +64,8 @@ export default function App() {
 		null,
 	);
 
+	const [loading, setLoading] = useState<Boolean>(false);
+
 	const [authState, setAuthState] = useState<AuthenticationState>({
 		isAuthenticating: false,
 		authMode: 'device',
@@ -81,9 +84,29 @@ export default function App() {
 		authManager.setAuthStateCallback(setAuthState);
 	}, []);
 
+	backendApiService.setStatusUpdateCallback((message) => {
+		console.log(message)
+		setLoading(false)
+	});
+
+	backendApiService.setOnUpdateCallback((action, details) => {
+		// Track when we start getting responses
+		setLoading(false)
+		if (action === 'Response' && details) {
+			addHistoryItem({
+				id: new Date().toLocaleDateString(),
+				role: 'system',
+				content: details,
+				timestamp: new Date(),
+			});
+
+		}
+	});
+
 	backendApiService.setToolRequestCallback(toolRequest => {
 		// Create enhanced tool request message with arguments preview
 		// Log when a tool is requested
+		setLoading(false)
 		addHistoryItem({
 			id: new Date().toLocaleDateString(),
 			role: 'system',
@@ -150,6 +173,10 @@ export default function App() {
 				<HistoryComponent history={history} />
 			)}
 
+			{loading && (
+				<LoadingComponent />
+			)}
+
 			{/* Dynamic UI Area - Stays at the bottom */}
 			<Box flexDirection="column">
 				{/* Dialogs - displayed inline below history */}
@@ -192,6 +219,7 @@ export default function App() {
 							sessionManager={sessionManager}
 							modelManager={modelManager}
 							clearHistory={clearHistory}
+							setLoading={setLoading}
 						/>
 					</InputProvider>
 				)}

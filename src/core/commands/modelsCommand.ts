@@ -129,22 +129,24 @@ export class ModelsCommand implements SlashCommand {
 					if (args[1]) {
 						await this.listProviderModels(args[1], context);
 					} else {
-						context?.addHistoryItem(
-							'Models Error',
-							'Provider name required. Usage: /models provider <provider_name>',
-							'text',
-						);
+						context?.addHistoryItem({
+							id: new Date().toLocaleDateString(),
+							role: 'system',
+							content: 'Provider name required. Usage: /models provider <provider_name>',
+							timestamp: new Date(),
+						})
 					}
 					break;
 				case 'details':
 					if (args[1] && args[2]) {
 						await this.getModelDetails(args[1], args[2], context);
 					} else {
-						context?.addHistoryItem(
-							'Models Error',
-							'Provider and model name required. Usage: /models details <provider> <model_name>',
-							'text',
-						);
+						context?.addHistoryItem({
+							id: new Date().toLocaleDateString(),
+							role: 'system',
+							content: 'Provider and model name required. Usage: /models details <provider> <model_name>',
+							timestamp: new Date(),
+						})
 					}
 					break;
 				case 'pricing':
@@ -154,11 +156,12 @@ export class ModelsCommand implements SlashCommand {
 					if (args[1] && args[2]) {
 						await this.validateModel(args[1], args[2], context);
 					} else {
-						context?.addHistoryItem(
-							'Models Error',
-							'Model type and version required. Usage: /models validate <model_type> <model_version>',
-							'text',
-						);
+						context?.addHistoryItem({
+							id: new Date().toLocaleDateString(),
+							role: 'system',
+							content: 'Model type and version required. Usage: /models validate <model_type> <model_version>',
+							timestamp: new Date(),
+						})
 					}
 					break;
 				case 'set':
@@ -181,30 +184,32 @@ export class ModelsCommand implements SlashCommand {
 					} else if (args[1] === 'clear') {
 						this.clearDefaultModel(context);
 					} else {
-						context?.addHistoryItem(
-							'Models Error',
-							'Usage: /models default [get|set <model_type> <model_version>|clear]',
-							'text',
-						);
+						context?.addHistoryItem({
+							id: new Date().toLocaleDateString(),
+							role: 'system',
+							content: 'Usage: /models default [get|set <model_type> <model_version>|clear]',
+							timestamp: new Date(),
+						})
 					}
 					break;
 				case 'help':
 					this.showHelp(context);
 					break;
 				default:
-					context?.addHistoryItem(
-						'Models Error',
-						`Unknown models command: ${subcommand}. Use /models help for available commands.`,
-						'text',
-					);
+					context?.addHistoryItem({
+						id: new Date().toLocaleDateString(),
+						role: 'system',
+						content: `Unknown models command: ${subcommand}. Use /models help for available commands.`,
+						timestamp: new Date(),
+					})
 			}
 		} catch (error) {
-			context?.addHistoryItem(
-				'Models Error',
-				`Models command failed: ${error instanceof Error ? error.message : String(error)
-				}`,
-				'text',
-			);
+			context?.addHistoryItem({
+				id: new Date().toLocaleDateString(),
+				role: 'system',
+				content: `Models command failed: ${error instanceof Error ? error.message : String(error)}`,
+				timestamp: new Date(),
+			})
 		}
 	}
 
@@ -223,26 +228,35 @@ export class ModelsCommand implements SlashCommand {
 						const defaultBadge = model.is_default ? ' **[DEFAULT]**' : '';
 						output += `### ${model.display_name}${defaultBadge}\n`;
 						output += `- **ID**: \`${model.name}\`\n`;
-						output += `- **Context**: ${this.formatNumber(model.context_length)} tokens\n`;
-						output += `- **Tools**: ${model.supports_tools ? '✅ Yes' : '❌ No'
-							}\n`;
-						output += `- **Streaming**: ${model.supports_streaming ? '✅ Yes' : '❌ No'
-							}\n`;
 						output += `- **Description**: ${model.description}\n`;
-						output += `- **Pricing**: $${model.input_cost_per_1k}/1K input, $${model.output_cost_per_1k}/1K output\n\n`;
 					}
 				}
 
-				context?.addHistoryItem('Models', output, 'text');
+				context?.addHistoryItem({
+					id: new Date().toLocaleDateString(),
+					role: 'system',
+					content: output,
+					timestamp: new Date(),
+				});
+
 			} else {
-				context?.addHistoryItem(
-					'Models Error',
-					'Failed to retrieve models or invalid response format',
-					'text',
-				);
+
+				context?.addHistoryItem({
+					id: new Date().toLocaleDateString(),
+					role: 'system',
+					content: 'Failed to retrieve models',
+					timestamp: new Date(),
+				});
+
 			}
 		} catch (error) {
-			throw error;
+			context?.addHistoryItem({
+				id: new Date().toLocaleDateString(),
+				role: 'system',
+				content: `Models command failed: ${error instanceof Error ? error.message : String(error)
+					}`,
+				timestamp: new Date(),
+			});
 		}
 	}
 
@@ -263,26 +277,34 @@ export class ModelsCommand implements SlashCommand {
 					const defaultBadge = model.is_default ? ' **[DEFAULT]**' : '';
 					output += `## ${model.display_name}${defaultBadge}\n`;
 					output += `- **ID**: \`${model.name}\`\n`;
-					output += `- **Context**: ${this.formatNumber(model.context_length)} tokens\n`;
-					output += `- **Max Output**: ${this.formatNumber(model.max_output_tokens)} tokens\n`;
-					output += `- **Tools**: ${model.supports_tools ? '✅ Yes' : '❌ No'
-						}\n`;
-					output += `- **Streaming**: ${model.supports_streaming ? '✅ Yes' : '❌ No'
-						}\n`;
 					output += `- **Description**: ${model.description}\n`;
-					output += `- **Pricing**: $${model.input_cost_per_1k}/1K input, $${model.output_cost_per_1k}/1K output\n\n`;
 				}
 
-				context?.addHistoryItem('Models', output, 'text');
+				context?.addHistoryItem({
+					id: new Date().toLocaleDateString(),
+					role: 'system',
+					content: output,
+					timestamp: new Date(),
+				});
+
 			} else {
-				context?.addHistoryItem(
-					'Models Error',
-					`No models found for provider: ${provider}`,
-					'text',
-				);
+
+				context?.addHistoryItem({
+					id: new Date().toLocaleDateString(),
+					role: 'system',
+					content: `No models found for provider: ${provider}`,
+					timestamp: new Date(),
+				});
+
 			}
 		} catch (error) {
-			throw error;
+
+			context?.addHistoryItem(
+				'Models Error',
+				`Models command failed: ${error instanceof Error ? error.message : String(error)
+				}`,
+				'text',
+			);
 		}
 	}
 
@@ -307,10 +329,7 @@ export class ModelsCommand implements SlashCommand {
 				output += `## Capabilities\n`;
 				output += `- **Context Length**: ${this.formatNumber(model.context_length)} tokens\n`;
 				output += `- **Max Output**: ${this.formatNumber(model.max_output_tokens)} tokens\n`;
-				output += `- **Tool Support**: ${model.supports_tools ? '✅ Yes' : '❌ No'
-					}\n`;
-				output += `- **Streaming**: ${model.supports_streaming ? '✅ Yes' : '❌ No'
-					}\n`;
+
 				if (model.is_default) {
 					output += `- **Status**: 🌟 Default model for ${provider}\n`;
 				}
@@ -323,13 +342,21 @@ export class ModelsCommand implements SlashCommand {
 					output += `- **Currency**: ${response.data.pricing.currency}\n\n`;
 				}
 
-				context?.addHistoryItem('Models', output, 'text');
+				context?.addHistoryItem({
+					id: new Date().toLocaleDateString(),
+					role: 'system',
+					content: output,
+					timestamp: new Date(),
+				});
+
 			} else {
-				context?.addHistoryItem(
-					'Models Error',
-					`Model ${modelName} not found for provider ${provider}`,
-					'text',
-				);
+				context?.addHistoryItem({
+					id: new Date().toLocaleDateString(),
+					role: 'system',
+					content: `Model ${modelName} not found for provider ${provider}`,
+					timestamp: new Date(),
+				});
+
 			}
 		} catch (error) {
 			throw error;
@@ -360,13 +387,21 @@ export class ModelsCommand implements SlashCommand {
 						)} |\n`;
 				});
 
-				context?.addHistoryItem('Models', output, 'text');
+				context?.addHistoryItem({
+					id: new Date().toLocaleDateString(),
+					role: 'system',
+					content: output,
+					timestamp: new Date(),
+				});
+
 			} else {
-				context?.addHistoryItem(
-					'Models Error',
-					'Failed to retrieve pricing comparison',
-					'text',
-				);
+
+				context?.addHistoryItem({
+					id: new Date().toLocaleDateString(),
+					role: 'system',
+					content: 'Failed to retrieve pricing comparison',
+					timestamp: new Date(),
+				});
 			}
 		} catch (error) {
 			throw error;
@@ -395,18 +430,24 @@ export class ModelsCommand implements SlashCommand {
 					output += `## Model Information\n`;
 					output += `**Display Name**: ${info.display_name}\n`;
 					output += `**Description**: ${info.description}\n`;
-					output += `**Context Length**: ${this.formatNumber(info.context_length)} tokens\n`;
-					output += `**Tool Support**: ${info.supports_tools ? '✅ Yes' : '❌ No'
-						}\n`;
+
 				}
 
-				context?.addHistoryItem('Models', output, 'text');
+				context?.addHistoryItem({
+					id: new Date().toLocaleDateString(),
+					role: 'system',
+					content: output,
+					timestamp: new Date(),
+				});
+
 			} else {
-				context?.addHistoryItem(
-					'Models Error',
-					`Model validation failed: ${response.message}`,
-					'text',
-				);
+
+				context?.addHistoryItem({
+					id: new Date().toLocaleDateString(),
+					role: 'system',
+					content: `Model validation failed: ${response.message}`,
+					timestamp: new Date(),
+				});
 			}
 		} catch (error) {
 			throw error;
@@ -427,32 +468,39 @@ export class ModelsCommand implements SlashCommand {
 			);
 
 			if (result.success) {
-				context?.addHistoryItem(
-					'Default Model Set',
-					`# Default Model Set
 
-**Provider**: ${modelType}
-**Model**: ${modelVersion}
-**Status**: Saved locally in ~/.octopus/config.json
+				let output = `# Default Model Set
 
-The default model will be used when no model is specified in chat commands.
-Model capabilities will be determined when first used.`,
-					'text',
-				);
+				**Provider**: ${modelType}
+				**Model**: ${modelVersion}
+				**Status**: Saved locally
+
+				The default model will be used when no model is specified in chat commands.
+				Model capabilities will be determined when first used.`
+
+				context?.addHistoryItem({
+					id: new Date().toLocaleDateString(),
+					role: 'system',
+					content: output,
+					timestamp: new Date(),
+				});
+
 			} else {
-				context?.addHistoryItem(
-					'Models Error',
-					`Failed to set default model: ${result.error}`,
-					'text',
-				);
+				context?.addHistoryItem({
+					id: new Date().toLocaleDateString(),
+					role: 'system',
+					content: `Failed to set default model: ${result.error}`,
+					timestamp: new Date(),
+				});
+
 			}
 		} catch (error) {
-			context?.addHistoryItem(
-				'Models Error',
-				`Failed to set default model: ${error instanceof Error ? error.message : String(error)
-				}`,
-				'text',
-			);
+			context?.addHistoryItem({
+				id: new Date().toLocaleDateString(),
+				role: 'system',
+				content: `Failed to set default model: ${error instanceof Error ? error.message : String(error)}`,
+				timestamp: new Date(),
+			});
 		}
 	}
 
@@ -461,44 +509,55 @@ Model capabilities will be determined when first used.`,
 		const configDir = this.modelManager.getConfigManager().getConfigDir();
 
 		if (!defaultModel) {
-			context?.addHistoryItem(
-				'Default Model Status',
-				`No default model set. Use \`/models default set <provider> <model>\` to set one.
 
-**Environment Variables** (only used on first setup):
-- \`DEFAULT_PROVIDER=anthropic\`
-- \`DEFAULT_MODEL=claude-3-5-sonnet\`
+			let output = `No default model set. Use \`/models default set <provider> <model>\` to set one.
 
-Config stored in: ${configDir}/config.json`,
-				'text',
-			);
+			**Environment Variables** (only used on first setup):
+			- \`DEFAULT_PROVIDER=anthropic\`
+			- \`DEFAULT_MODEL=claude-3-5-sonnet\`
+
+			Config stored in: ${configDir}/config.json`
+
+			context?.addHistoryItem({
+				id: new Date().toLocaleDateString(),
+				role: 'system',
+				content: output,
+				timestamp: new Date(),
+			});
+
 			return;
 		}
 
-		context?.addHistoryItem(
-			'Default Model Status',
-			`# Current Default Model
+		let output = `# Current Default Model
 
-**Provider**: ${defaultModel.provider}
-**Model**: ${defaultModel.model_name}
-**Config Location**: ${configDir}/config.json
+		**Provider**: ${defaultModel.provider}
+		**Model**: ${defaultModel.model_name}
+		**Config Location**: ${configDir}/config.json
 
-The model capabilities (context length, tool support) will be determined when first used.`,
-			'text',
-		);
+		The model capabilities (context length, tool support) will be determined when first used.`
+
+		context?.addHistoryItem({
+			id: new Date().toLocaleDateString(),
+			role: 'system',
+			content: output,
+			timestamp: new Date(),
+		});
 	}
 
 	private clearDefaultModel(context?: any): void {
 		const hadDefault = this.modelManager.hasDefaultModel();
 		this.modelManager.clearDefaultModel();
 
-		context?.addHistoryItem(
-			'Default Model Clear',
-			hadDefault
-				? 'Default model cleared successfully.'
-				: 'No default model was set.',
-			'text',
-		);
+		let output = hadDefault
+			? 'Default model cleared successfully.'
+			: 'No default model was set.'
+
+		context?.addHistoryItem({
+			id: new Date().toLocaleDateString(),
+			role: 'system',
+			content: output,
+			timestamp: new Date(),
+		});
 	}
 
 	private triggerModelSelectionDialog(context?: any): void {
@@ -510,23 +569,27 @@ The model capabilities (context length, tool support) will be determined when fi
 			});
 		} else {
 			// Fallback to manual instruction if dialog system not available
-			context?.addHistoryItem(
-				'Model Selection',
-				`# Select Default Model
 
-To set a default model, you can either:
+			let output = `# Select Default Model
 
-1. **Use the interactive selector**: The model selection dialog should appear automatically
-2. **Manual format**: \`/models default set <provider> <model>\`
+			To set a default model, you can either:
 
-**Examples**:
-- \`/models default set anthropic claude-3-5-sonnet\`
-- \`/models default set openai gpt-4\`
-- \`/models default set google gemini-1.5-flash\`
+			1. **Use the interactive selector**: The model selection dialog should appear automatically
+			2. **Manual format**: \`/models default set <provider> <model>\`
 
-First, list available models with \`/models list\` to see all options.`,
-				'text',
-			);
+			**Examples**:
+			- \`/models default set anthropic claude-3-5-sonnet\`
+			- \`/models default set openai gpt-4\`
+			- \`/models default set google gemini-1.5-flash\`
+
+			First, list available models with \`/models list\` to see all options.`
+
+			context?.addHistoryItem({
+				id: new Date().toLocaleDateString(),
+				role: 'system',
+				content: output,
+				timestamp: new Date(),
+			});
 		}
 	}
 
@@ -595,6 +658,11 @@ Shows this help information.
 \`\`\`
 `;
 
-		context?.addHistoryItem('Models Help', output, 'text');
+		context?.addHistoryItem({
+			id: new Date().toLocaleDateString(),
+			role: 'system',
+			content: output,
+			timestamp: new Date(),
+		});
 	}
 }

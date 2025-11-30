@@ -25,11 +25,12 @@ export class InitCommand implements SlashCommand {
 			const octopusPath = path.join(process.cwd(), 'octopus.md');
 
 			if (fs.existsSync(octopusPath)) {
-				context?.addHistoryItem(
-					'Init Warning',
-					'⚠️ octopus.md already exists. Use --force to overwrite.',
-					'text',
-				);
+				context?.addHistoryItem({
+					id: new Date().toLocaleDateString(),
+					role: 'system',
+					content: 'octopus.md already exists. Use --force to overwrite.',
+					timestamp: new Date(),
+				});
 
 				if (!args.includes('--force')) {
 					return;
@@ -41,6 +42,13 @@ export class InitCommand implements SlashCommand {
 				'🚀 Initializing project documentation with AI assistance...',
 				'text',
 			);
+
+			context?.addHistoryItem({
+				id: new Date().toLocaleDateString(),
+				role: 'system',
+				content: 'Initializing project documentation with AI assistance...',
+				timestamp: new Date(),
+			});
 
 			// Create the prompt for generating octopus.md content
 			const initPrompt = `You are helping to initialize a CLI application project by creating comprehensive documentation in octopus.md format.
@@ -92,18 +100,22 @@ Please generate comprehensive, well-structured markdown content that will serve 
 				'gpt-5', // use a capable model
 			);
 
-			context?.addHistoryItem(
-				'Init Progress',
-				'📝 AI is analyzing the project and generating documentation...',
-				'text',
-			);
+			context?.addHistoryItem({
+				id: new Date().toLocaleDateString(),
+				role: 'system',
+				content: 'AI is analyzing the project and generating documentation...',
+				timestamp: new Date(),
+			});
+
 		} catch (error) {
-			context?.addHistoryItem(
-				'Init Error',
-				`❌ Failed to initialize project: ${error instanceof Error ? error.message : String(error)
-				}`,
-				'text',
-			);
+
+			context?.addHistoryItem({
+				id: new Date().toLocaleDateString(),
+				role: 'system',
+				content: `Failed to initialize project: ${error instanceof Error ? error.message : String(error)}`,
+				timestamp: new Date(),
+			});
+
 		}
 	}
 }
