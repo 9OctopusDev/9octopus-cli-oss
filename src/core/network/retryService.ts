@@ -131,7 +131,6 @@ export class RetryService {
 
 				// Log successful retry if it took more than 1 attempt
 				if (attempt > 1 && context) {
-
 				}
 
 				return result;
@@ -163,7 +162,6 @@ export class RetryService {
 		}
 
 		// If we get here, all retries failed
-
 
 		throw lastError;
 	}

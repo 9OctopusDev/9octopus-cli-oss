@@ -1,7 +1,11 @@
-import { CommandOption, SlashCommand, SlashCommandSubCommand } from "../../interfaces/slashCommands.js";
-import { AuthenticationManager } from "../auth/authenticationManager.js";
-import { AuthService } from "../auth/authService.js";
-import { AuthConfigManager } from "../configs/config.js";
+import {
+	CommandOption,
+	SlashCommand,
+	SlashCommandSubCommand,
+} from '../../interfaces/slashCommands.js';
+import {AuthenticationManager} from '../auth/authenticationManager.js';
+import {AuthService} from '../auth/authService.js';
+import {AuthConfigManager} from '../configs/config.js';
 
 export class LoginCommand implements SlashCommand {
 	name: string = 'login';
@@ -36,9 +40,10 @@ export class LoginCommand implements SlashCommand {
 				addHistoryItem({
 					id: new Date().toLocaleDateString(),
 					role: 'system',
-					content: 'Authentication is disabled. You can use the CLI without authentication',
+					content:
+						'Authentication is disabled. You can use the CLI without authentication',
 					timestamp: new Date(),
-				})
+				});
 
 				return;
 			}
@@ -51,7 +56,9 @@ export class LoginCommand implements SlashCommand {
 				addHistoryItem({
 					id: new Date().toLocaleDateString(),
 					role: 'system',
-					content: `Already authenticated as: ${user?.email || user?.name || 'Unknown user'}. Use /logout to sign out and login with a different account`,
+					content: `Already authenticated as: ${
+						user?.email || user?.name || 'Unknown user'
+					}. Use /logout to sign out and login with a different account`,
 					timestamp: new Date(),
 				});
 				return;
@@ -81,7 +88,6 @@ export class LoginCommand implements SlashCommand {
 			});
 
 			if (error.message.includes('timeout')) {
-
 				addHistoryItem({
 					id: new Date().toLocaleDateString(),
 					role: 'system',
@@ -89,7 +95,6 @@ export class LoginCommand implements SlashCommand {
 					timestamp: new Date(),
 				});
 			} else {
-
 				addHistoryItem({
 					id: new Date().toLocaleDateString(),
 					role: 'system',
@@ -100,5 +105,6 @@ export class LoginCommand implements SlashCommand {
 		}
 	}
 
-	action: (args: string[], context?: any) => void = (args, context) => this.executeLogin(args, context);
+	action: (args: string[], context?: any) => void = (args, context) =>
+		this.executeLogin(args, context);
 }

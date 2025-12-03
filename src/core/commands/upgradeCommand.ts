@@ -1,4 +1,4 @@
-import { SlashCommand } from '../../interfaces/slashCommands.js';
+import {SlashCommand} from '../../interfaces/slashCommands.js';
 
 export class UpgradeCommand implements SlashCommand {
 	name = 'upgrade';
@@ -6,11 +6,10 @@ export class UpgradeCommand implements SlashCommand {
 
 	subcommands = [];
 
-	constructor() { }
+	constructor() {}
 
 	async action(_args: string[], context?: any): Promise<void> {
 		const upgradeUrl = 'https://app.9octopus.com/profile';
-
 
 		let output = `# Upgrade Your Plan
 
@@ -22,7 +21,7 @@ export class UpgradeCommand implements SlashCommand {
 
 **Visit:** ${upgradeUrl}
 
-To open the upgrade page, copy and paste the URL above into your browser.`
+To open the upgrade page, copy and paste the URL above into your browser.`;
 
 		context?.addHistoryItem({
 			id: new Date().toLocaleDateString(),
@@ -34,7 +33,7 @@ To open the upgrade page, copy and paste the URL above into your browser.`
 		// In a real implementation, you might want to automatically open the URL
 		// using a system command like 'open' on macOS or 'xdg-open' on Linux
 		try {
-			const { spawn } = await import('child_process');
+			const {spawn} = await import('child_process');
 			const platform = process.platform;
 
 			let command: string;
@@ -46,10 +45,9 @@ To open the upgrade page, copy and paste the URL above into your browser.`
 				command = 'xdg-open';
 			}
 
-			spawn(command, [upgradeUrl], { detached: true, stdio: 'ignore' });
+			spawn(command, [upgradeUrl], {detached: true, stdio: 'ignore'});
 		} catch (error) {
 			// If opening fails, the URL is already displayed above
-
 		}
 	}
 }

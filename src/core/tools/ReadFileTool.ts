@@ -1,5 +1,5 @@
 import * as fs from 'fs';
-import { Tool, ToolResult, ToolParameter } from '../../interfaces/tools.js';
+import {Tool, ToolResult, ToolParameter} from '../../interfaces/tools.js';
 
 export class ReadFileTool implements Tool {
 	name: string = 'read_file';
@@ -21,11 +21,9 @@ export class ReadFileTool implements Tool {
 
 	async execute(
 		args: Record<string, any>,
-		toolId: string
+		toolId: string,
 	): Promise<ToolResult> {
-		const { path, encoding = 'utf8' } = args;
-
-
+		const {path, encoding = 'utf8'} = args;
 
 		try {
 			if (!fs.existsSync(path as string)) {

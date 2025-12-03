@@ -3,10 +3,10 @@ import {createServer, Server} from 'http';
 import {URL} from 'url';
 import {default as open} from 'open';
 import {v4 as uuidv4} from 'uuid';
-import { AuthConfigManager } from '../configs/config.js';
-import { SecureTokenStorage, TokenData, UserInfo } from './tokenStorage.js';
-import { RetryService } from '../network/retryService.js';
-import { NetworkErrorUtils } from '../network/networkErrors.js';
+import {AuthConfigManager} from '../configs/config.js';
+import {SecureTokenStorage, TokenData, UserInfo} from './tokenStorage.js';
+import {RetryService} from '../network/retryService.js';
+import {NetworkErrorUtils} from '../network/networkErrors.js';
 
 export interface DeviceCodeResponse {
 	device_code: string;
@@ -141,9 +141,7 @@ export class AuthService {
 				}
 			});
 
-			this.callbackServer.listen(this.callbackPort, () => {
-
-			});
+			this.callbackServer.listen(this.callbackPort, () => {});
 
 			this.callbackServer.on('error', error => {
 				reject(new Error(`Failed to start callback server: ${error.message}`));
@@ -200,8 +198,6 @@ export class AuthService {
 			addHistoryItem('Starting authentication flow...', '', 'text');
 			addHistoryItem(`Opening browser to: ${authUrl}`, '', 'text');
 		} else {
-
-
 		}
 
 		try {
@@ -217,7 +213,6 @@ export class AuthService {
 					'text',
 				);
 			} else {
-
 			}
 
 			// Wait for callback
@@ -530,7 +525,6 @@ export class AuthService {
 			addHistoryItem('3. Complete the authentication process', '', 'text');
 			addHistoryItem('='.repeat(50), '', 'text');
 		} else {
-
 		}
 
 		// Open browser automatically
@@ -544,7 +538,6 @@ export class AuthService {
 					'text',
 				);
 			} else {
-
 			}
 		}
 
@@ -624,7 +617,6 @@ export class AuthService {
 					if (addHistoryItem) {
 						addHistoryItem('⏳ Waiting for authentication...', '', 'text');
 					} else {
-
 					}
 					continue;
 				} else if (tokenData.error === 'slow_down') {
@@ -646,7 +638,6 @@ export class AuthService {
 				if (addHistoryItem) {
 					addHistoryItem('Network error, retrying...', '', 'text');
 				} else {
-
 				}
 			}
 		}
@@ -692,7 +683,6 @@ export class AuthService {
 	 */
 	public async logout(): Promise<void> {
 		await this.tokenStorage.clearTokens();
-
 	}
 
 	/**

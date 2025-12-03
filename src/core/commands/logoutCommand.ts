@@ -3,8 +3,8 @@ import {
 	SlashCommand,
 	SlashCommandSubCommand,
 } from '../../interfaces/slashCommands.js';
-import { AuthService } from '../auth/authService.js';
-import { AuthConfigManager } from '../configs/config.js';
+import {AuthService} from '../auth/authService.js';
+import {AuthConfigManager} from '../configs/config.js';
 
 export class LogoutCommand implements SlashCommand {
 	name: string = 'logout';
@@ -26,7 +26,6 @@ export class LogoutCommand implements SlashCommand {
 		try {
 			// Check if authentication is enabled
 			if (!this.configManager.isAuthEnabled()) {
-
 				addHistoryItem({
 					id: new Date().toLocaleDateString(),
 					role: 'system',
@@ -60,12 +59,7 @@ export class LogoutCommand implements SlashCommand {
 				content: 'User Logged out',
 				timestamp: new Date(),
 			});
-
-
-		} catch (error: any) {
-
-
-		}
+		} catch (error: any) {}
 	}
 
 	action: (args: string[]) => void = this.executeLogout;

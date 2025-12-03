@@ -1,4 +1,4 @@
-import { SlashCommand } from "../../interfaces/slashCommands.js";
+import {SlashCommand} from '../../interfaces/slashCommands.js';
 
 export class CommandAgregator {
 	private commands: SlashCommand[] = [];
@@ -24,5 +24,4 @@ export class CommandAgregator {
 				lowerName.includes(command.name.toLowerCase()),
 		);
 	}
-
 }

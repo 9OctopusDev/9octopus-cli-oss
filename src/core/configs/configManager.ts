@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import * as os from 'os';
-import { ModelInfo } from '../../interfaces/sessions.js';
+import {ModelInfo} from '../../interfaces/sessions.js';
 import envConfig from '../config.js';
 
 interface OctopusConfig {
@@ -25,8 +25,7 @@ export class ConfigManager {
 	 */
 	private ensureConfigDir(): void {
 		if (!fs.existsSync(this.configDir)) {
-			fs.mkdirSync(this.configDir, { recursive: true });
-
+			fs.mkdirSync(this.configDir, {recursive: true});
 		}
 	}
 
@@ -78,7 +77,6 @@ export class ConfigManager {
 				context_length: 0, // Will be updated when we validate
 				supports_tools: false, // Will be updated when we validate
 			};
-
 		}
 
 		// Save the initial config to disk immediately
@@ -101,9 +99,7 @@ export class ConfigManager {
 		try {
 			this.ensureConfigDir();
 			fs.writeFileSync(this.configPath, JSON.stringify(config, null, 2));
-		} catch (error) {
-
-		}
+		} catch (error) {}
 	}
 
 	/**
@@ -119,7 +115,6 @@ export class ConfigManager {
 	setDefaultModel(modelInfo: ModelInfo): void {
 		this.config.defaultModel = modelInfo;
 		this.saveConfig();
-
 	}
 
 	/**
@@ -128,7 +123,6 @@ export class ConfigManager {
 	clearDefaultModel(): void {
 		delete this.config.defaultModel;
 		this.saveConfig();
-
 	}
 
 	/**
@@ -149,6 +143,6 @@ export class ConfigManager {
 	 * Gets the full configuration
 	 */
 	getConfig(): OctopusConfig {
-		return { ...this.config };
+		return {...this.config};
 	}
 }

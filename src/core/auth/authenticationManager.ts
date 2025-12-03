@@ -1,7 +1,12 @@
-import { DeviceAuthInfo } from "../../ui/components/AuthenticationDialog.js";
-import { AuthService } from "./authService.js";
+import {DeviceAuthInfo} from '../../ui/components/AuthenticationDialog.js';
+import {AuthService} from './authService.js';
 
-export type AuthStatus = 'initializing' | 'waiting' | 'polling' | 'success' | 'error';
+export type AuthStatus =
+	| 'initializing'
+	| 'waiting'
+	| 'polling'
+	| 'success'
+	| 'error';
 
 export interface AuthenticationState {
 	isAuthenticating: boolean;
@@ -38,13 +43,15 @@ export class AuthenticationManager {
 	}
 
 	private updateState(updates: Partial<AuthenticationState>) {
-		this.currentState = { ...this.currentState, ...updates };
+		this.currentState = {...this.currentState, ...updates};
 		if (this.authStateCallback) {
 			this.authStateCallback(this.currentState);
 		}
 	}
 
-	public async startAuthentication(useBrowserFlow: boolean = false): Promise<void> {
+	public async startAuthentication(
+		useBrowserFlow: boolean = false,
+	): Promise<void> {
 		try {
 			this.updateState({
 				isAuthenticating: true,
@@ -96,11 +103,15 @@ export class AuthenticationManager {
 			}
 		};
 
-		const result = await this.authService.loginWithDeviceFlowWithCallback(authCallback);
+		const result = await this.authService.loginWithDeviceFlowWithCallback(
+			authCallback,
+		);
 
 		this.updateState({
 			status: 'success',
-			statusMessage: `Welcome, ${result.userInfo.name || result.userInfo.email || 'User'}!`,
+			statusMessage: `Welcome, ${
+				result.userInfo.name || result.userInfo.email || 'User'
+			}!`,
 		});
 
 		// Keep success message visible for 2 seconds
@@ -120,7 +131,9 @@ export class AuthenticationManager {
 
 		this.updateState({
 			status: 'success',
-			statusMessage: `Welcome, ${result.userInfo.name || result.userInfo.email || 'User'}!`,
+			statusMessage: `Welcome, ${
+				result.userInfo.name || result.userInfo.email || 'User'
+			}!`,
 		});
 
 		// Keep success message visible for 2 seconds

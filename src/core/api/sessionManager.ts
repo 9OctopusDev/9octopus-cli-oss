@@ -1,4 +1,8 @@
-import { SessionState, TokenUsage, ScrollPosition } from '../../interfaces/sessions.js';
+import {
+	SessionState,
+	TokenUsage,
+	ScrollPosition,
+} from '../../interfaces/sessions.js';
 
 export class SessionManager {
 	private currentSession: SessionState;

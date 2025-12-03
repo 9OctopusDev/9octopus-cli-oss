@@ -3,8 +3,8 @@ import {
 	SlashCommand,
 	SlashCommandSubCommand,
 } from '../../interfaces/slashCommands.js';
-import { BackendApiService } from '../api/backendApiService.js';
-import { SessionManager } from '../api/sessionManager.js';
+import {ModelManager} from '../api/modelManager.js';
+import {SessionManager} from '../api/sessionManager.js';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -15,9 +15,9 @@ export class InitCommand implements SlashCommand {
 	options: CommandOption[] = [];
 
 	constructor(
-		private backendApiService: BackendApiService,
+		private modelManager: ModelManager,
 		private sessionManager: SessionManager,
-	) { }
+	) {}
 
 	async action(args: string[], context?: any): Promise<void> {
 		try {
@@ -92,13 +92,13 @@ Based on the project structure and codebase analysis, please create an octopus.m
 Please generate comprehensive, well-structured markdown content that will serve as the main documentation file for this project. Focus on practical information that developers would need to understand and contribute to the codebase.`;
 
 			// Use the backend service to generate the content
-			await this.backendApiService.startConversation(
-				this.sessionManager.getSessionId(),
-				initPrompt,
-				undefined, // no additional context
-				'openai', // default to anthropic
-				'gpt-5', // use a capable model
-			);
+			await this.modelManager.startConversation({
+				sessionId: this.sessionManager.getSessionId(),
+				message: initPrompt,
+				context: undefined,
+				provider: 'openai',
+				model: 'gpt-4o',
+			});
 
 			context?.addHistoryItem({
 				id: new Date().toLocaleDateString(),
@@ -106,16 +106,15 @@ Please generate comprehensive, well-structured markdown content that will serve 
 				content: 'AI is analyzing the project and generating documentation...',
 				timestamp: new Date(),
 			});
-
 		} catch (error) {
-
 			context?.addHistoryItem({
 				id: new Date().toLocaleDateString(),
 				role: 'system',
-				content: `Failed to initialize project: ${error instanceof Error ? error.message : String(error)}`,
+				content: `Failed to initialize project: ${
+					error instanceof Error ? error.message : String(error)
+				}`,
 				timestamp: new Date(),
 			});
-
 		}
 	}
 }

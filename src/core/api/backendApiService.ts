@@ -4,15 +4,21 @@ import {
 	ConversationStatus,
 } from '../../interfaces/sessions.js';
 
-import { ToolExecutionRequest, ToolResult } from '../../interfaces/tools.js';
-import { AuthService } from '../auth/authService.js';
-import { AuthConfigManager } from '../configs/config.js';
-import { RetryService, RetryConfig } from '../network/retryService.js';
-import { NetworkErrorUtils } from '../network/networkErrors.js';
-import { ConfigManager } from '../configs/configManager.js';
+import {
+	Tool,
+	ToolExecutionRequest,
+	ToolResult,
+} from '../../interfaces/tools.js';
+import {AuthService} from '../auth/authService.js';
+import {AuthConfigManager} from '../configs/config.js';
+import {RetryService, RetryConfig} from '../network/retryService.js';
+import {NetworkErrorUtils} from '../network/networkErrors.js';
+import {ConfigManager} from '../configs/configManager.js';
 // import { EventSource } from 'eventsource';
 
-export class BackendApiService {
+import {LLMService} from './llm/LLMService.js';
+
+export class BackendApiService implements LLMService {
 	private baseURL: string;
 	private onUpdateCallback: (
 		action: string,
@@ -20,9 +26,7 @@ export class BackendApiService {
 		type?: 'text' | 'code' | 'command' | undefined,
 	) => void;
 	private setToolRequest: (request: ToolExecutionRequest) => void;
-	private onStatusUpdate: (
-		message: string,
-	) => void;
+	private onStatusUpdate: (message: string) => void;
 	private onTokenUsageUpdate: (tokenUsage: TokenUsage) => void;
 	private currentStream: ReadableStreamDefaultReader<Uint8Array> | null = null;
 	private authService: AuthService;
@@ -34,10 +38,10 @@ export class BackendApiService {
 	constructor(sessionId: string, baseURL?: string) {
 		this.configManager = AuthConfigManager.getInstance();
 		this.baseURL = baseURL || this.configManager.getBaseURL();
-		this.onUpdateCallback = () => { };
-		this.setToolRequest = () => { };
-		this.onStatusUpdate = () => { };
-		this.onTokenUsageUpdate = () => { };
+		this.onUpdateCallback = () => {};
+		this.setToolRequest = () => {};
+		this.onStatusUpdate = () => {};
+		this.onTokenUsageUpdate = () => {};
 		this.authService = AuthService.getInstance();
 		this.modelConfigManager = new ConfigManager();
 		this.sessionId = sessionId;
@@ -51,10 +55,7 @@ export class BackendApiService {
 	 */
 
 	setOnUpdateCallback(
-		onUpdateCallback: (
-			action: string,
-			details?: string | undefined,
-		) => void,
+		onUpdateCallback: (action: string, details?: string | undefined) => void,
 	) {
 		this.onUpdateCallback = onUpdateCallback;
 	}
@@ -65,11 +66,7 @@ export class BackendApiService {
 		this.setToolRequest = setToolRequest;
 	}
 
-	setStatusUpdateCallback(
-		onStatusUpdate: (
-			message: string,
-		) => void,
-	) {
+	setStatusUpdateCallback(onStatusUpdate: (message: string) => void) {
 		this.onStatusUpdate = onStatusUpdate;
 	}
 
@@ -115,6 +112,8 @@ export class BackendApiService {
 		context?: string,
 		modelType: string = 'openai',
 		modelVersion: string = 'gpt-3.5-turbo',
+		systemPrompt?: string,
+		_tools?: Tool[],
 	): Promise<void> {
 		try {
 			await this.ensureAuthenticated();
@@ -125,10 +124,9 @@ export class BackendApiService {
 				content: message,
 				model_type: modelType,
 				model_version: modelVersion,
-				...(context && { context }),
+				...(context && {context}),
+				...(systemPrompt && {system_prompt: systemPrompt}),
 			};
-
-
 
 			// Set initial thinking status
 			this.onStatusUpdate('');
@@ -163,17 +161,20 @@ export class BackendApiService {
 					throw new Error('Authentication failed. Please run: /login');
 				}
 				if (response.status === 403) {
-					throw new Error('No active subscription found. Please subscribe to continue using the service.');
+					throw new Error(
+						'No active subscription found. Please subscribe to continue using the service.',
+					);
 				}
 				if (response.status === 402) {
-					throw new Error('Usage limit reached. Please upgrade your plan or wait until the limit resets.');
+					throw new Error(
+						'Usage limit reached. Please upgrade your plan or wait until the limit resets.',
+					);
 				}
 				throw new Error(`HTTP ${response.status}: ${response.statusText}`);
 			}
 
 			await this.handleSSEResponse(response);
 		} catch (error) {
-
 			// Clear the loading state when there's an error
 			this.onStatusUpdate('');
 			const networkError = NetworkErrorUtils.fromError(error);
@@ -182,7 +183,6 @@ export class BackendApiService {
 			);
 		}
 	}
-
 
 	async submitToolResults(
 		toolResult: ToolResult,
@@ -200,12 +200,10 @@ export class BackendApiService {
 			// Always prioritize configured default model unless explicitly overridden
 			const defaultModel = this.modelConfigManager.getDefaultModel();
 
-
 			if (modelType && modelVersion) {
 				// Use explicitly provided model parameters (override)
 				effectiveModelType = modelType;
 				effectiveModelVersion = modelVersion;
-
 			} else if (
 				defaultModel &&
 				defaultModel.provider &&
@@ -214,12 +212,10 @@ export class BackendApiService {
 				// Use configured default model (preferred)
 				effectiveModelType = defaultModel.provider;
 				effectiveModelVersion = defaultModel.model_name;
-
 			} else {
 				// Fallback to hardcoded defaults only if no default model is configured
 				effectiveModelType = 'openai';
 				effectiveModelVersion = 'gpt-3.5-turbo';
-
 			}
 
 			const data = {
@@ -228,8 +224,6 @@ export class BackendApiService {
 				model_type: effectiveModelType,
 				model_version: effectiveModelVersion,
 			};
-
-
 
 			const headers = await this.getAuthHeaders();
 			headers['Accept'] = 'text/event-stream';
@@ -265,7 +259,6 @@ export class BackendApiService {
 
 			await this.handleSSEResponse(response);
 		} catch (error) {
-
 			// Clear the loading state when there's an error
 			this.onStatusUpdate('');
 			const networkError = NetworkErrorUtils.fromError(error);
@@ -291,14 +284,13 @@ export class BackendApiService {
 
 		try {
 			while (true) {
-				const { done, value } = await reader.read();
+				const {done, value} = await reader.read();
 
 				if (done) {
-
 					break;
 				}
 
-				buffer += decoder.decode(value, { stream: true });
+				buffer += decoder.decode(value, {stream: true});
 
 				// Process complete SSE events
 				const events = this.parseSSEBuffer(buffer);
@@ -312,7 +304,6 @@ export class BackendApiService {
 			}
 		} catch (error: any) {
 			if (error.name !== 'AbortError') {
-
 				// Clear the loading state when there's a stream error
 				this.onStatusUpdate('');
 				throw error;
@@ -327,8 +318,8 @@ export class BackendApiService {
 	 */
 	private parseSSEBuffer(
 		buffer: string,
-	): Array<{ type: string; data: string; parsedData: any }> {
-		const events: Array<{ type: string; data: string; parsedData: any }> = [];
+	): Array<{type: string; data: string; parsedData: any}> {
+		const events: Array<{type: string; data: string; parsedData: any}> = [];
 		const eventBlocks = buffer.split('\n\n');
 
 		for (const block of eventBlocks) {
@@ -363,7 +354,6 @@ export class BackendApiService {
 	 * Handle token usage updates from SSE events
 	 */
 	private handleTokenUsageUpdate(tokenUsage: any): void {
-
 		this.onTokenUsageUpdate(tokenUsage);
 	}
 
@@ -375,11 +365,8 @@ export class BackendApiService {
 		data: string;
 		parsedData: any;
 	}): void {
-
-
 		switch (event.type) {
 			case 'assistant.message':
-
 				if (event.parsedData.content) {
 					this.onUpdateCallback('Response', event.parsedData.content, 'text');
 				}
@@ -394,7 +381,6 @@ export class BackendApiService {
 				break;
 
 			case 'tool_call':
-
 				this.onStatusUpdate('');
 
 				if (event.parsedData.token_usage) {
@@ -410,17 +396,14 @@ export class BackendApiService {
 				break;
 
 			case 'done':
-
 				// Set status to idle when conversation is complete
 				this.onStatusUpdate('');
 				break;
 
 			case 'error':
-
 				throw new Error(event.parsedData.error || 'Server error');
 
 			default:
-
 		}
 	}
 
@@ -431,9 +414,7 @@ export class BackendApiService {
 		if (this.currentStream) {
 			try {
 				this.currentStream.cancel();
-			} catch (error) {
-
-			}
+			} catch (error) {}
 			this.currentStream = null;
 		}
 	}
@@ -443,8 +424,8 @@ export class BackendApiService {
 	 */
 	public destroy(): void {
 		this.closeCurrentStream();
-		this.onUpdateCallback = () => { };
-		this.setToolRequest = () => { };
+		this.onUpdateCallback = () => {};
+		this.setToolRequest = () => {};
 	}
 
 	async getConversationStatus(sessionId: string): Promise<ConversationStatus> {
@@ -455,7 +436,7 @@ export class BackendApiService {
 
 			const response = await RetryService.retryFetch(
 				`${this.baseURL}/conversations/${sessionId}`,
-				{ headers },
+				{headers},
 				this.retryConfig,
 				'Get conversation status',
 			);
@@ -484,7 +465,7 @@ export class BackendApiService {
 			const headers = await this.getAuthHeaders();
 			delete headers['Content-Type'];
 
-			const response = await fetch(`${this.baseURL}/models`, { headers });
+			const response = await fetch(`${this.baseURL}/models`, {headers});
 
 			if (!response.ok) {
 				if (response.status === 401) {
@@ -535,7 +516,7 @@ export class BackendApiService {
 
 			const response = await fetch(
 				`${this.baseURL}/models/${provider}/${modelName}`,
-				{ headers },
+				{headers},
 			);
 
 			if (!response.ok) {
@@ -589,7 +570,7 @@ export class BackendApiService {
 			const headers = await this.getAuthHeaders();
 			delete headers['Content-Type'];
 
-			const response = await fetch(`${this.baseURL}/models/pricing`, { headers });
+			const response = await fetch(`${this.baseURL}/models/pricing`, {headers});
 
 			if (!response.ok) {
 				if (response.status === 401) {
@@ -603,5 +584,4 @@ export class BackendApiService {
 			throw new Error(`Failed to get pricing comparison: ${error}`);
 		}
 	}
-
 }

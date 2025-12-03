@@ -1,6 +1,6 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import { Tool, ToolParameter, ToolResult } from '../../interfaces/tools.js';
+import {Tool, ToolParameter, ToolResult} from '../../interfaces/tools.js';
 
 export class WriteFileTool implements Tool {
 	name: string = 'write_file';
@@ -44,13 +44,11 @@ export class WriteFileTool implements Tool {
 			createDirs = false,
 		} = args;
 
-
-
 		try {
 			if (createDirs) {
 				const dir = path.dirname(filePath as string);
 				if (!fs.existsSync(dir)) {
-					fs.mkdirSync(dir, { recursive: true });
+					fs.mkdirSync(dir, {recursive: true});
 				}
 			}
 

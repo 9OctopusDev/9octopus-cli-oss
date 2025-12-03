@@ -150,7 +150,6 @@ export class SecureTokenStorage {
 			await this.storeTokens(newTokens);
 			return newTokens;
 		} catch (error) {
-
 			return null;
 		}
 	}
@@ -166,7 +165,6 @@ export class SecureTokenStorage {
 			const tokenJson = JSON.stringify(tokens, null, 2);
 			await fs.writeFile(tokenFile, tokenJson, {mode: 0o600}); // Readable only by user
 		} catch (error) {
-
 			throw error;
 		}
 	}
@@ -196,9 +194,7 @@ export class SecureTokenStorage {
 
 			const userJson = JSON.stringify(userInfo, null, 2);
 			await fs.writeFile(userFile, userJson, {mode: 0o600});
-		} catch (error) {
-
-		}
+		} catch (error) {}
 	}
 
 	/**

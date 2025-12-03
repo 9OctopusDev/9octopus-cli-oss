@@ -1,12 +1,14 @@
-import { BackendApiService } from "../api/backendApiService.js";
-import { Tool, ToolExecutionRequest, ToolResult } from "../../interfaces/tools.js";
+import {LLMService} from '../api/llm/LLMService.js';
+import {
+	Tool,
+	ToolExecutionRequest,
+	ToolResult,
+} from '../../interfaces/tools.js';
 
 export class ToolManager {
 	private tools: Map<string, Tool> = new Map();
 
-	constructor(
-		private backendApiService: BackendApiService,
-	) { }
+	constructor(private llmService: LLMService) {}
 
 	registerTool(tool: Tool): void {
 		this.tools.set(tool.name, tool);
@@ -67,8 +69,9 @@ export class ToolManager {
 				name: name,
 				ok: false,
 				result: {},
-				error: `Unknown error occurred: ${error instanceof Error ? error.message : 'Unknown error'
-					}`,
+				error: `Unknown error occurred: ${
+					error instanceof Error ? error.message : 'Unknown error'
+				}`,
 			};
 		}
 	}
@@ -79,9 +82,7 @@ export class ToolManager {
 				toolExecutionRequest.name,
 				toolExecutionRequest.args,
 				toolExecutionRequest.id,
-			).then(toolResult =>
-				this.submitToolResults(toolResult),
-			);
+			).then(toolResult => this.submitToolResults(toolResult));
 		} else {
 			// Handle tool denial locally - don't submit to backend
 			// The conversation should pause/stop when user denies a tool
@@ -91,9 +92,7 @@ export class ToolManager {
 		}
 	}
 
-	async submitToolResults(
-		toolResult: ToolResult,
-	): Promise<void> {
-		await this.backendApiService.submitToolResults(toolResult);
+	async submitToolResults(toolResult: ToolResult): Promise<void> {
+		await this.llmService.submitToolResults(toolResult);
 	}
 }

@@ -1,43 +1,45 @@
-
-import React, { useEffect, useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import HistoryComponent from './ui/components/HistoryComponent.js';
-import { Box, Text } from 'ink';
+import {Box, Text} from 'ink';
 import useHistoryDisplay from './hooks/historyDisplay.js';
 import InputComponent from './ui/components/InputComponent.js';
-import { CommandAgregator } from './core/commands/commands.js';
-import { SessionManager } from './core/api/sessionManager.js';
-import { ModelManager } from './core/api/modelManager.js';
-import { BackendApiService } from './core/api/backendApiService.js';
-import { ConfigManager } from './core/configs/configManager.js';
-import { LoginCommand } from './core/commands/loginCommand.js';
-import { LogoutCommand } from './core/commands/logoutCommand.js';
-import { ClearCommand } from './core/commands/clearCommand.js';
-import { ModelsCommand } from './core/commands/modelsCommand.js';
-import { InitCommand } from './core/commands/initCommand.js';
-import { UpgradeCommand } from './core/commands/upgradeCommand.js';
-import { InputProvider } from './ui/contexts/InputContext.js';
-import { ToolManager } from './core/tools/ToolManager.js';
-import { AuthenticationManager, AuthenticationState } from './core/auth/authenticationManager.js';
-import { ShellTool } from './core/tools/ShellTool.js';
-import { ReadFileTool } from './core/tools/ReadFileTool.js';
-import { WriteFileTool } from './core/tools/WriteFileTool.js';
-import { SearchTool } from './core/tools/SearchTool.js';
-import { ToolExecutionRequest } from './interfaces/tools.js';
+import {CommandAgregator} from './core/commands/commands.js';
+import {SessionManager} from './core/api/sessionManager.js';
+import {ModelManager} from './core/api/modelManager.js';
+import {ConfigManager} from './core/configs/configManager.js';
+import {LoginCommand} from './core/commands/loginCommand.js';
+import {LogoutCommand} from './core/commands/logoutCommand.js';
+import {ClearCommand} from './core/commands/clearCommand.js';
+import {ModelsCommand} from './core/commands/modelsCommand.js';
+import {InitCommand} from './core/commands/initCommand.js';
+import {UpgradeCommand} from './core/commands/upgradeCommand.js';
+import {InputProvider} from './ui/contexts/InputContext.js';
+import {ToolManager} from './core/tools/ToolManager.js';
+import {
+	AuthenticationManager,
+	AuthenticationState,
+} from './core/auth/authenticationManager.js';
+import {ShellTool} from './core/tools/ShellTool.js';
+import {ReadFileTool} from './core/tools/ReadFileTool.js';
+import {WriteFileTool} from './core/tools/WriteFileTool.js';
+import {SearchTool} from './core/tools/SearchTool.js';
+import {ToolExecutionRequest} from './interfaces/tools.js';
 import ToolRequestComponent from './ui/components/ToolRequestDialog.js';
 import ModelSelectionDialog from './ui/components/ModelSelectionDialog.js';
 import AuthenticationDialog from './ui/components/AuthenticationDialog.js';
 import LoadingComponent from './ui/components/LoadingComponent.js';
 
+import {ServiceFactory} from './core/api/llm/ServiceFactory.js';
+
 const commandAgregator = new CommandAgregator();
 const sessionManager = new SessionManager();
-const backendApiService = new BackendApiService(sessionManager.getSessionId());
+const llmService = ServiceFactory.createService(sessionManager.getSessionId());
 const configManager = new ConfigManager();
-const modelManager = new ModelManager(configManager, backendApiService);
-const toolManager = new ToolManager(backendApiService);
+const modelManager = new ModelManager(configManager, llmService);
+const toolManager = new ToolManager(llmService);
 const authManager = AuthenticationManager.getInstance();
 
 export default function App() {
-
 	useEffect(() => {
 		// Register tools
 		toolManager.registerTool(new ShellTool());
@@ -48,15 +50,9 @@ export default function App() {
 		// Register commands
 		commandAgregator.addCommand(new LoginCommand());
 		commandAgregator.addCommand(new LogoutCommand());
-		// commandAgregator.addCommand(new WhoamiCommand());
-		// commandAgregator.addCommand(new StatusCommand());
 		commandAgregator.addCommand(new ClearCommand(sessionManager));
-		commandAgregator.addCommand(
-			new ModelsCommand(backendApiService, modelManager),
-		);
-		commandAgregator.addCommand(
-			new InitCommand(backendApiService, sessionManager),
-		);
+		commandAgregator.addCommand(new ModelsCommand(llmService, modelManager));
+		commandAgregator.addCommand(new InitCommand(modelManager, sessionManager));
 		commandAgregator.addCommand(new UpgradeCommand());
 	}, []);
 
@@ -73,40 +69,38 @@ export default function App() {
 	});
 
 	const [showModelSelection, setShowModelSelection] = useState<{
-		backendApiService: BackendApiService;
+		llmService: any;
 		modelManager: ModelManager;
 	} | null>(null);
 
-	const { history, addHistoryItem, clearHistory } =
-		useHistoryDisplay();
+	const {history, addHistoryItem, clearHistory} = useHistoryDisplay();
 
 	useEffect(() => {
 		authManager.setAuthStateCallback(setAuthState);
 	}, []);
 
-	backendApiService.setStatusUpdateCallback((message) => {
-		console.log(message)
-		setLoading(false)
+	modelManager.setStatusUpdateCallback(message => {
+		console.log(message);
+		// setLoading(false);
 	});
 
-	backendApiService.setOnUpdateCallback((action, details) => {
+	modelManager.setOnUpdateCallback((action, details) => {
 		// Track when we start getting responses
-		setLoading(false)
+		setLoading(false);
 		if (action === 'Response' && details) {
 			addHistoryItem({
 				id: new Date().toLocaleDateString(),
-				role: 'system',
+				role: 'assistant',
 				content: details,
 				timestamp: new Date(),
 			});
-
 		}
 	});
 
-	backendApiService.setToolRequestCallback(toolRequest => {
+	modelManager.setToolRequestCallback(toolRequest => {
 		// Create enhanced tool request message with arguments preview
 		// Log when a tool is requested
-		setLoading(false)
+		setLoading(false);
 		addHistoryItem({
 			id: new Date().toLocaleDateString(),
 			role: 'system',
@@ -116,18 +110,21 @@ export default function App() {
 
 		// Show approval dialog
 		setPendingTool(toolRequest);
-
 	});
 
 	// Set up token usage update callback
-	backendApiService.setTokenUsageUpdateCallback((tokenUsage: any) => {
+	modelManager.setTokenUsageUpdateCallback((tokenUsage: any) => {
 		sessionManager.updateTokenUsage(tokenUsage);
 	});
 
 	// Handle model selection completion
 	const handleModelSelected = async (provider: string, modelName: string) => {
 		try {
-			const result = await modelManager.setDefaultModel(provider, modelName, false);
+			const result = await modelManager.setDefaultModel(
+				provider,
+				modelName,
+				false,
+			);
 
 			if (result.success) {
 				addHistoryItem({
@@ -173,12 +170,10 @@ export default function App() {
 				<HistoryComponent history={history} />
 			)}
 
-			{loading && (
-				<LoadingComponent />
-			)}
-
 			{/* Dynamic UI Area - Stays at the bottom */}
 			<Box flexDirection="column">
+				{loading && <LoadingComponent />}
+
 				{/* Dialogs - displayed inline below history */}
 				{pendingTool && (
 					<ToolRequestComponent
@@ -192,7 +187,7 @@ export default function App() {
 
 				{showModelSelection && (
 					<ModelSelectionDialog
-						backendApiService={showModelSelection.backendApiService}
+						llmService={showModelSelection.llmService}
 						modelManager={showModelSelection.modelManager}
 						onModelSelected={handleModelSelected}
 						onCancel={handleModelSelectionCancel}
@@ -218,8 +213,10 @@ export default function App() {
 							commandAgregator={commandAgregator}
 							sessionManager={sessionManager}
 							modelManager={modelManager}
+							toolManager={toolManager}
 							clearHistory={clearHistory}
 							setLoading={setLoading}
+							setShowModelSelection={setShowModelSelection}
 						/>
 					</InputProvider>
 				)}

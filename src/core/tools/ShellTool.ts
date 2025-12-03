@@ -1,6 +1,6 @@
-import { exec } from 'child_process';
-import { promisify } from 'util';
-import { Tool, ToolResult, ToolParameter } from '../../interfaces/tools.js';
+import {exec} from 'child_process';
+import {promisify} from 'util';
+import {Tool, ToolResult, ToolParameter} from '../../interfaces/tools.js';
 
 const execAsync = promisify(exec);
 
@@ -18,12 +18,12 @@ export class ShellTool implements Tool {
 
 	async execute(
 		args: Record<string, any>,
-		toolId: string
+		toolId: string,
 	): Promise<ToolResult> {
-		const { command } = args;
+		const {command} = args;
 
 		try {
-			const { stdout, stderr } = await execAsync(command as string, {
+			const {stdout, stderr} = await execAsync(command as string, {
 				encoding: 'utf8',
 				maxBuffer: 1024 * 1024, // 1MB buffer
 			});

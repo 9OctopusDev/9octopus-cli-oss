@@ -1,8 +1,8 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import { exec } from 'child_process';
-import { promisify } from 'util';
-import { Tool, ToolResult, ToolParameter } from '../../interfaces/tools.js';
+import {exec} from 'child_process';
+import {promisify} from 'util';
+import {Tool, ToolResult, ToolParameter} from '../../interfaces/tools.js';
 
 const execAsync = promisify(exec);
 
@@ -20,13 +20,16 @@ export class SearchTool implements Tool {
 
 	async execute(
 		args: Record<string, any>,
-		toolId: string
+		toolId: string,
 	): Promise<ToolResult> {
-		const { pattern } = args;
+		const {pattern} = args;
 		const searchPath = process.cwd();
 
 		try {
-			const results: { files: string[]; content: Array<{ file: string; line: number; match: string }> } = {
+			const results: {
+				files: string[];
+				content: Array<{file: string; line: number; match: string}>;
+			} = {
 				files: [],
 				content: [],
 			};
@@ -52,33 +55,51 @@ export class SearchTool implements Tool {
 		}
 	}
 
-	private async searchFiles(pattern: string, searchPath: string): Promise<string[]> {
+	private async searchFiles(
+		pattern: string,
+		searchPath: string,
+	): Promise<string[]> {
 		try {
 			// Use find command with case-insensitive glob pattern support
 			const command = `find "${searchPath}" -iname "*${pattern}*" -type f 2>/dev/null | grep -v node_modules | grep -v .git | head -100`;
 
-			const { stdout } = await execAsync(command);
-			return stdout.trim() ? stdout.trim().split('\n').filter(line => line.length > 0) : [];
+			const {stdout} = await execAsync(command);
+			return stdout.trim()
+				? stdout
+						.trim()
+						.split('\n')
+						.filter(line => line.length > 0)
+				: [];
 		} catch (error) {
 			// If find fails, fallback to simple fs traversal
 			return this.searchFilesRecursive(searchPath, pattern);
 		}
 	}
 
-	private searchFilesRecursive(dir: string, pattern: string, results: string[] = []): string[] {
+	private searchFilesRecursive(
+		dir: string,
+		pattern: string,
+		results: string[] = [],
+	): string[] {
 		try {
-			const entries = fs.readdirSync(dir, { withFileTypes: true });
+			const entries = fs.readdirSync(dir, {withFileTypes: true});
 
 			for (const entry of entries) {
 				// Skip common directories that should be excluded
-				if (entry.isDirectory() && ['node_modules', '.git', '.next', 'dist', 'build'].includes(entry.name)) {
+				if (
+					entry.isDirectory() &&
+					['node_modules', '.git', '.next', 'dist', 'build'].includes(
+						entry.name,
+					)
+				) {
 					continue;
 				}
 
 				const fullPath = path.join(dir, entry.name);
 
 				if (entry.isDirectory()) {
-					if (results.length < 100) { // Limit results to prevent overwhelming output
+					if (results.length < 100) {
+						// Limit results to prevent overwhelming output
 						this.searchFilesRecursive(fullPath, pattern, results);
 					}
 				} else {
@@ -98,7 +119,10 @@ export class SearchTool implements Tool {
 		return results;
 	}
 
-	private async searchContent(pattern: string, searchPath: string): Promise<Array<{ file: string; line: number; match: string }>> {
+	private async searchContent(
+		pattern: string,
+		searchPath: string,
+	): Promise<Array<{file: string; line: number; match: string}>> {
 		try {
 			// Try to use ripgrep first (faster), fallback to grep
 			let command: string;
@@ -110,10 +134,13 @@ export class SearchTool implements Tool {
 				command = `grep -r -i -n --exclude-dir=node_modules --exclude-dir=.git "${pattern}" "${searchPath}" 2>/dev/null | head -50`;
 			}
 
-			const { stdout } = await execAsync(command);
+			const {stdout} = await execAsync(command);
 
-			const results: Array<{ file: string; line: number; match: string }> = [];
-			const lines = stdout.trim().split('\n').filter(line => line.length > 0);
+			const results: Array<{file: string; line: number; match: string}> = [];
+			const lines = stdout
+				.trim()
+				.split('\n')
+				.filter(line => line.length > 0);
 
 			for (const line of lines) {
 				const match = line.match(/^([^:]+):(\d+):(.*)$/);

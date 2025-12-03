@@ -1,6 +1,8 @@
-import { ModelInfo } from '../../interfaces/sessions.js';
-import { ConfigManager } from '../configs/configManager.js';
-import { BackendApiService } from './backendApiService.js';
+import {ModelInfo} from '../../interfaces/sessions.js';
+import {ConfigManager} from '../configs/configManager.js';
+import {LLMService} from './llm/LLMService.js';
+import {ToolExecutionRequest, Tool} from '../../interfaces/tools.js';
+import {TokenUsage} from '../../interfaces/sessions.js';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -27,18 +29,16 @@ export interface ModelUsageRequest {
 	model?: string;
 	// Optional: flag to indicate if context should be included (first message)
 	includeContext?: boolean;
+	tools?: Tool[];
 }
 
 export class ModelManager {
 	private configManager: ConfigManager;
-	private backendApiService: BackendApiService;
+	private llmService: LLMService;
 
-	constructor(
-		configManager: ConfigManager,
-		backendApiService: BackendApiService,
-	) {
+	constructor(configManager: ConfigManager, llmService: LLMService) {
 		this.configManager = configManager;
-		this.backendApiService = backendApiService;
+		this.llmService = llmService;
 	}
 
 	/**
@@ -79,10 +79,7 @@ export class ModelManager {
 		model: string,
 	): Promise<ModelValidationResult> {
 		try {
-			const response = await this.backendApiService.validateModel(
-				provider,
-				model,
-			);
+			const response = await this.llmService.validateModel(provider, model);
 
 			if (response.status === 'success' && response.data.valid) {
 				const modelInfo: ModelInfo = {
@@ -126,7 +123,7 @@ export class ModelManager {
 		provider: string,
 		model: string,
 		validateWithBackend = false,
-	): Promise<{ success: boolean; error?: string; modelInfo?: ModelInfo }> {
+	): Promise<{success: boolean; error?: string; modelInfo?: ModelInfo}> {
 		try {
 			let modelInfo: ModelInfo;
 
@@ -203,6 +200,21 @@ export class ModelManager {
 	}
 
 	/**
+	 * Load 9octopus.system.md content as system prompt
+	 */
+	private loadSystemPrompt(): string | undefined {
+		try {
+			const systemPromptPath = path.join(process.cwd(), '9octopus.system.md');
+			if (fs.existsSync(systemPromptPath)) {
+				return fs.readFileSync(systemPromptPath, 'utf8');
+			}
+		} catch (error) {
+			console.warn('Failed to load 9octopus.system.md:', error);
+		}
+		return undefined;
+	}
+
+	/**
 	 * Starts a conversation with the best available model
 	 */
 	async startConversation(request: ModelUsageRequest): Promise<any> {
@@ -219,7 +231,8 @@ export class ModelManager {
 
 		// Only include context on first message or when explicitly requested
 		let combinedContext: string | undefined;
-		if (request.includeContext !== false) { // Default to true for backward compatibility
+		if (request.includeContext !== false) {
+			// Default to true for backward compatibility
 			const octopusContext = this.loadOctopusContext();
 			combinedContext = octopusContext
 				? request.context
@@ -230,13 +243,45 @@ export class ModelManager {
 			combinedContext = undefined; // Don't send context for subsequent messages
 		}
 
-		return this.backendApiService.startConversation(
+		const systemPrompt = this.loadSystemPrompt();
+
+		return this.llmService.startConversation(
 			request.sessionId,
 			request.message,
 			combinedContext,
 			effectiveModel.provider,
 			effectiveModel.model_name,
+			systemPrompt,
+			request.tools,
 		);
+	}
+
+	// Callback Management Methods
+
+	setOnUpdateCallback(
+		callback: (
+			action: string,
+			details?: string,
+			type?: 'text' | 'code' | 'command',
+		) => void,
+	): void {
+		this.llmService.setOnUpdateCallback(callback);
+	}
+
+	setToolRequestCallback(
+		callback: (request: ToolExecutionRequest) => void,
+	): void {
+		this.llmService.setToolRequestCallback(callback);
+	}
+
+	setStatusUpdateCallback(callback: (message: string) => void): void {
+		this.llmService.setStatusUpdateCallback(callback);
+	}
+
+	setTokenUsageUpdateCallback(
+		callback: (tokenUsage: TokenUsage) => void,
+	): void {
+		this.llmService.setTokenUsageUpdateCallback(callback);
 	}
 
 	/**

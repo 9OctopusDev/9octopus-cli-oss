@@ -1,7 +1,9 @@
-import { SlashCommand, SlashCommandSubCommand } from "../../interfaces/slashCommands.js";
-import { BackendApiService } from "../api/backendApiService.js";
-import { ModelManager } from "../api/modelManager.js";
-
+import {
+	SlashCommand,
+	SlashCommandSubCommand,
+} from '../../interfaces/slashCommands.js';
+import {LLMService} from '../api/llm/LLMService.js';
+import {ModelManager} from '../api/modelManager.js';
 
 export class ModelsCommand implements SlashCommand {
 	name = 'models';
@@ -21,11 +23,12 @@ export class ModelsCommand implements SlashCommand {
 			name: 'list',
 			description: 'List all available models from all providers',
 			options: [],
-			action: () => { },
+			action: () => {},
 		},
 		{
 			name: 'provider',
-			description: 'List models for a specific provider (anthropic, openai, google)',
+			description:
+				'List models for a specific provider (anthropic, openai, google)',
 			options: [
 				{
 					name: '<provider_name>',
@@ -33,7 +36,7 @@ export class ModelsCommand implements SlashCommand {
 					type: 'string',
 				},
 			],
-			action: () => { },
+			action: () => {},
 		},
 		{
 			name: 'details',
@@ -50,13 +53,13 @@ export class ModelsCommand implements SlashCommand {
 					type: 'string',
 				},
 			],
-			action: () => { },
+			action: () => {},
 		},
 		{
 			name: 'pricing',
 			description: 'Show pricing comparison of all models',
 			options: [],
-			action: () => { },
+			action: () => {},
 		},
 		{
 			name: 'validate',
@@ -73,7 +76,7 @@ export class ModelsCommand implements SlashCommand {
 					type: 'string',
 				},
 			],
-			action: () => { },
+			action: () => {},
 		},
 		{
 			name: 'set',
@@ -90,7 +93,7 @@ export class ModelsCommand implements SlashCommand {
 					type: 'string',
 				},
 			],
-			action: () => { },
+			action: () => {},
 		},
 		{
 			name: 'default',
@@ -102,20 +105,20 @@ export class ModelsCommand implements SlashCommand {
 					type: 'string',
 				},
 			],
-			action: () => { },
+			action: () => {},
 		},
 		{
 			name: 'help',
 			description: 'Show detailed help information',
 			options: [],
-			action: () => { },
+			action: () => {},
 		},
 	];
 
 	constructor(
-		private backendApiService: BackendApiService,
+		private llmService: LLMService,
 		private modelManager: ModelManager,
-	) { }
+	) {}
 
 	async action(args: string[], context?: any): Promise<void> {
 		const subcommand = args[0] || 'list';
@@ -132,9 +135,10 @@ export class ModelsCommand implements SlashCommand {
 						context?.addHistoryItem({
 							id: new Date().toLocaleDateString(),
 							role: 'system',
-							content: 'Provider name required. Usage: /models provider <provider_name>',
+							content:
+								'Provider name required. Usage: /models provider <provider_name>',
 							timestamp: new Date(),
-						})
+						});
 					}
 					break;
 				case 'details':
@@ -144,9 +148,10 @@ export class ModelsCommand implements SlashCommand {
 						context?.addHistoryItem({
 							id: new Date().toLocaleDateString(),
 							role: 'system',
-							content: 'Provider and model name required. Usage: /models details <provider> <model_name>',
+							content:
+								'Provider and model name required. Usage: /models details <provider> <model_name>',
 							timestamp: new Date(),
-						})
+						});
 					}
 					break;
 				case 'pricing':
@@ -159,9 +164,10 @@ export class ModelsCommand implements SlashCommand {
 						context?.addHistoryItem({
 							id: new Date().toLocaleDateString(),
 							role: 'system',
-							content: 'Model type and version required. Usage: /models validate <model_type> <model_version>',
+							content:
+								'Model type and version required. Usage: /models validate <model_type> <model_version>',
 							timestamp: new Date(),
-						})
+						});
 					}
 					break;
 				case 'set':
@@ -187,9 +193,10 @@ export class ModelsCommand implements SlashCommand {
 						context?.addHistoryItem({
 							id: new Date().toLocaleDateString(),
 							role: 'system',
-							content: 'Usage: /models default [get|set <model_type> <model_version>|clear]',
+							content:
+								'Usage: /models default [get|set <model_type> <model_version>|clear]',
 							timestamp: new Date(),
-						})
+						});
 					}
 					break;
 				case 'help':
@@ -201,28 +208,31 @@ export class ModelsCommand implements SlashCommand {
 						role: 'system',
 						content: `Unknown models command: ${subcommand}. Use /models help for available commands.`,
 						timestamp: new Date(),
-					})
+					});
 			}
 		} catch (error) {
 			context?.addHistoryItem({
 				id: new Date().toLocaleDateString(),
 				role: 'system',
-				content: `Models command failed: ${error instanceof Error ? error.message : String(error)}`,
+				content: `Models command failed: ${
+					error instanceof Error ? error.message : String(error)
+				}`,
 				timestamp: new Date(),
-			})
+			});
 		}
 	}
 
 	private async listAllModels(context?: any): Promise<void> {
 		try {
-			const response = await this.backendApiService.getAllModels();
+			const response = await this.llmService.getAllModels();
 
 			if (response.status === 'success' && response.data.providers) {
 				let output = '# Available Models\n\n';
 
 				for (const [, provider] of Object.entries(response.data.providers)) {
-					output += `## ${provider.provider_name} (${provider.total_models || Object.keys(provider.models).length
-						} models)\n\n`;
+					output += `## ${provider.provider_name} (${
+						provider.total_models || Object.keys(provider.models).length
+					} models)\n\n`;
 
 					for (const [, model] of Object.entries(provider.models)) {
 						const defaultBadge = model.is_default ? ' **[DEFAULT]**' : '';
@@ -238,23 +248,21 @@ export class ModelsCommand implements SlashCommand {
 					content: output,
 					timestamp: new Date(),
 				});
-
 			} else {
-
 				context?.addHistoryItem({
 					id: new Date().toLocaleDateString(),
 					role: 'system',
 					content: 'Failed to retrieve models',
 					timestamp: new Date(),
 				});
-
 			}
 		} catch (error) {
 			context?.addHistoryItem({
 				id: new Date().toLocaleDateString(),
 				role: 'system',
-				content: `Models command failed: ${error instanceof Error ? error.message : String(error)
-					}`,
+				content: `Models command failed: ${
+					error instanceof Error ? error.message : String(error)
+				}`,
 				timestamp: new Date(),
 			});
 		}
@@ -265,9 +273,7 @@ export class ModelsCommand implements SlashCommand {
 		context?: any,
 	): Promise<void> {
 		try {
-			const response = await this.backendApiService.getModelsByProvider(
-				provider,
-			);
+			const response = await this.llmService.getModelsByProvider(provider);
 
 			if (response.status === 'success' && response.data.models) {
 				let output = `# ${response.data.provider_name} Models\n\n`;
@@ -286,22 +292,19 @@ export class ModelsCommand implements SlashCommand {
 					content: output,
 					timestamp: new Date(),
 				});
-
 			} else {
-
 				context?.addHistoryItem({
 					id: new Date().toLocaleDateString(),
 					role: 'system',
 					content: `No models found for provider: ${provider}`,
 					timestamp: new Date(),
 				});
-
 			}
 		} catch (error) {
-
 			context?.addHistoryItem(
 				'Models Error',
-				`Models command failed: ${error instanceof Error ? error.message : String(error)
+				`Models command failed: ${
+					error instanceof Error ? error.message : String(error)
 				}`,
 				'text',
 			);
@@ -314,7 +317,7 @@ export class ModelsCommand implements SlashCommand {
 		context?: any,
 	): Promise<void> {
 		try {
-			const response = await this.backendApiService.getSpecificModel(
+			const response = await this.llmService.getSpecificModel(
 				provider,
 				modelName,
 			);
@@ -327,8 +330,12 @@ export class ModelsCommand implements SlashCommand {
 				output += `**Description**: ${model.description}\n\n`;
 
 				output += `## Capabilities\n`;
-				output += `- **Context Length**: ${this.formatNumber(model.context_length)} tokens\n`;
-				output += `- **Max Output**: ${this.formatNumber(model.max_output_tokens)} tokens\n`;
+				output += `- **Context Length**: ${this.formatNumber(
+					model.context_length,
+				)} tokens\n`;
+				output += `- **Max Output**: ${this.formatNumber(
+					model.max_output_tokens,
+				)} tokens\n`;
 
 				if (model.is_default) {
 					output += `- **Status**: 🌟 Default model for ${provider}\n`;
@@ -348,7 +355,6 @@ export class ModelsCommand implements SlashCommand {
 					content: output,
 					timestamp: new Date(),
 				});
-
 			} else {
 				context?.addHistoryItem({
 					id: new Date().toLocaleDateString(),
@@ -356,7 +362,6 @@ export class ModelsCommand implements SlashCommand {
 					content: `Model ${modelName} not found for provider ${provider}`,
 					timestamp: new Date(),
 				});
-
 			}
 		} catch (error) {
 			throw error;
@@ -365,7 +370,7 @@ export class ModelsCommand implements SlashCommand {
 
 	private async getPricing(context?: any): Promise<void> {
 		try {
-			const response = await this.backendApiService.getPricingComparison();
+			const response = await this.llmService.getPricingComparison();
 
 			if (response.status === 'success' && response.data.pricing_comparison) {
 				let output = `# Model Pricing Comparison\n\n`;
@@ -380,11 +385,13 @@ export class ModelsCommand implements SlashCommand {
 				output += `|------|--------|----------|---------------|----------------|---------|------------------|\n`;
 
 				response.data.pricing_comparison.forEach((model, index) => {
-					output += `| ${index + 1} | ${model.display_name} | ${model.provider
-						} | $${model.input_cost_per_1k} | $${model.output_cost_per_1k
-						} | ${this.formatNumber(model.context_length)} | ${model.cost_effectiveness_ratio.toFixed(
-							0,
-						)} |\n`;
+					output += `| ${index + 1} | ${model.display_name} | ${
+						model.provider
+					} | $${model.input_cost_per_1k} | $${
+						model.output_cost_per_1k
+					} | ${this.formatNumber(
+						model.context_length,
+					)} | ${model.cost_effectiveness_ratio.toFixed(0)} |\n`;
 				});
 
 				context?.addHistoryItem({
@@ -393,9 +400,7 @@ export class ModelsCommand implements SlashCommand {
 					content: output,
 					timestamp: new Date(),
 				});
-
 			} else {
-
 				context?.addHistoryItem({
 					id: new Date().toLocaleDateString(),
 					role: 'system',
@@ -414,7 +419,7 @@ export class ModelsCommand implements SlashCommand {
 		context?: any,
 	): Promise<void> {
 		try {
-			const response = await this.backendApiService.validateModel(
+			const response = await this.llmService.validateModel(
 				modelType,
 				modelVersion,
 			);
@@ -430,7 +435,6 @@ export class ModelsCommand implements SlashCommand {
 					output += `## Model Information\n`;
 					output += `**Display Name**: ${info.display_name}\n`;
 					output += `**Description**: ${info.description}\n`;
-
 				}
 
 				context?.addHistoryItem({
@@ -439,9 +443,7 @@ export class ModelsCommand implements SlashCommand {
 					content: output,
 					timestamp: new Date(),
 				});
-
 			} else {
-
 				context?.addHistoryItem({
 					id: new Date().toLocaleDateString(),
 					role: 'system',
@@ -468,7 +470,6 @@ export class ModelsCommand implements SlashCommand {
 			);
 
 			if (result.success) {
-
 				let output = `# Default Model Set
 
 				**Provider**: ${modelType}
@@ -476,7 +477,7 @@ export class ModelsCommand implements SlashCommand {
 				**Status**: Saved locally
 
 				The default model will be used when no model is specified in chat commands.
-				Model capabilities will be determined when first used.`
+				Model capabilities will be determined when first used.`;
 
 				context?.addHistoryItem({
 					id: new Date().toLocaleDateString(),
@@ -484,7 +485,6 @@ export class ModelsCommand implements SlashCommand {
 					content: output,
 					timestamp: new Date(),
 				});
-
 			} else {
 				context?.addHistoryItem({
 					id: new Date().toLocaleDateString(),
@@ -492,13 +492,14 @@ export class ModelsCommand implements SlashCommand {
 					content: `Failed to set default model: ${result.error}`,
 					timestamp: new Date(),
 				});
-
 			}
 		} catch (error) {
 			context?.addHistoryItem({
 				id: new Date().toLocaleDateString(),
 				role: 'system',
-				content: `Failed to set default model: ${error instanceof Error ? error.message : String(error)}`,
+				content: `Failed to set default model: ${
+					error instanceof Error ? error.message : String(error)
+				}`,
 				timestamp: new Date(),
 			});
 		}
@@ -509,14 +510,13 @@ export class ModelsCommand implements SlashCommand {
 		const configDir = this.modelManager.getConfigManager().getConfigDir();
 
 		if (!defaultModel) {
-
 			let output = `No default model set. Use \`/models default set <provider> <model>\` to set one.
 
 			**Environment Variables** (only used on first setup):
 			- \`DEFAULT_PROVIDER=anthropic\`
 			- \`DEFAULT_MODEL=claude-3-5-sonnet\`
 
-			Config stored in: ${configDir}/config.json`
+			Config stored in: ${configDir}/config.json`;
 
 			context?.addHistoryItem({
 				id: new Date().toLocaleDateString(),
@@ -534,7 +534,7 @@ export class ModelsCommand implements SlashCommand {
 		**Model**: ${defaultModel.model_name}
 		**Config Location**: ${configDir}/config.json
 
-		The model capabilities (context length, tool support) will be determined when first used.`
+		The model capabilities (context length, tool support) will be determined when first used.`;
 
 		context?.addHistoryItem({
 			id: new Date().toLocaleDateString(),
@@ -550,7 +550,7 @@ export class ModelsCommand implements SlashCommand {
 
 		let output = hadDefault
 			? 'Default model cleared successfully.'
-			: 'No default model was set.'
+			: 'No default model was set.';
 
 		context?.addHistoryItem({
 			id: new Date().toLocaleDateString(),
@@ -564,7 +564,7 @@ export class ModelsCommand implements SlashCommand {
 		// Set a flag in context to trigger the model selection dialog
 		if (context?.setShowModelSelection) {
 			context.setShowModelSelection({
-				backendApiService: this.backendApiService,
+				llmService: this.llmService,
 				modelManager: this.modelManager,
 			});
 		} else {
@@ -582,7 +582,7 @@ export class ModelsCommand implements SlashCommand {
 			- \`/models default set openai gpt-4\`
 			- \`/models default set google gemini-1.5-flash\`
 
-			First, list available models with \`/models list\` to see all options.`
+			First, list available models with \`/models list\` to see all options.`;
 
 			context?.addHistoryItem({
 				id: new Date().toLocaleDateString(),

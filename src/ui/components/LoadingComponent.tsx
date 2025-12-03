@@ -1,24 +1,23 @@
 import React from 'react';
-import { Box, Text } from 'ink';
+import {Box, Text} from 'ink';
 import Spinner from 'ink-spinner';
 
-
 const LoadingComponent: React.FC = () => {
-    return (
-        <Box>
-            <Text>
-                <Text color="green">
-                    <Spinner type="star" />
-                </Text>
-                <Text color="green">
-                    <Spinner type="star" />
-                </Text>
-                <Text color="green">
-                    <Spinner type="star" />
-                </Text>
-            </Text>
-        </Box>
-    );
+	return (
+		<Box>
+			<Text>
+				<Text color="green">
+					<Spinner type="star" />
+				</Text>
+				<Text color="green">
+					<Spinner type="star" />
+				</Text>
+				<Text color="green">
+					<Spinner type="star" />
+				</Text>
+			</Text>
+		</Box>
+	);
 };
 
 export default React.memo(LoadingComponent);

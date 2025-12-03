@@ -64,22 +64,28 @@ export const InputProvider: React.FC<InputProviderProps> = ({children}) => {
 	}, []);
 
 	// Request input focus - returns true if granted
-	const requestInputFocus = useCallback((component: string): boolean => {
-		setInputState(prev => {
-			// If no one has focus or it's the same component, grant it
-			if (!prev.activeComponent || prev.activeComponent === component) {
-				return {
-					...prev,
-					activeComponent: component,
-				};
-			}
-			// Otherwise, deny the request
-			return prev;
-		});
+	const requestInputFocus = useCallback(
+		(component: string): boolean => {
+			setInputState(prev => {
+				// If no one has focus or it's the same component, grant it
+				if (!prev.activeComponent || prev.activeComponent === component) {
+					return {
+						...prev,
+						activeComponent: component,
+					};
+				}
+				// Otherwise, deny the request
+				return prev;
+			});
 
-		// Check if the request was granted
-		return inputState.activeComponent === component || inputState.activeComponent === null;
-	}, [inputState.activeComponent]);
+			// Check if the request was granted
+			return (
+				inputState.activeComponent === component ||
+				inputState.activeComponent === null
+			);
+		},
+		[inputState.activeComponent],
+	);
 
 	// Release input focus
 	const releaseInputFocus = useCallback((component: string) => {

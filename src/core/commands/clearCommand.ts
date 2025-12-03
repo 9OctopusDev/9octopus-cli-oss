@@ -1,5 +1,5 @@
-import { SlashCommand } from "../../interfaces/slashCommands.js";
-import { SessionManager } from "../api/sessionManager.js";
+import {SlashCommand} from '../../interfaces/slashCommands.js';
+import {SessionManager} from '../api/sessionManager.js';
 
 export class ClearCommand implements SlashCommand {
 	name = 'clear';
@@ -12,7 +12,7 @@ export class ClearCommand implements SlashCommand {
 	}
 
 	async action(_args: string[], context: any): Promise<void> {
-		const { addHistoryItem, clearHistory } = context;
+		const {addHistoryItem, clearHistory} = context;
 
 		try {
 			const oldSessionId = this.sessionManager.getSessionId().slice(-8);
@@ -31,7 +31,7 @@ export class ClearCommand implements SlashCommand {
 				content: `New session started! Previous session: ${oldSessionId}, New session: ${newSession.sessionId.slice(
 					-8,
 				)}`,
-				timestamp: new Date()
+				timestamp: new Date(),
 			});
 		} catch (error) {
 			addHistoryItem({
