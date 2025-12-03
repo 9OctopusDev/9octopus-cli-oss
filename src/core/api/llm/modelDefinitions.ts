@@ -60,23 +60,12 @@ const ModelDefinitions = {
 	anthropic: {
 		provider_name: 'anthropic',
 		models: {
-			'claude-4-1-opus': {
-				name: 'claude-4-1-opus',
-				display_name: 'Claude 4.1 Opus',
+			'claude-4-5-opus': {
+				name: 'claude-4-5-opus',
+				display_name: 'Claude 4.5 Opus',
 				context_length: 200000,
-				input_cost_per_1k: 0.015,
-				output_cost_per_1k: 0.075,
-				supports_tools: true,
-				max_output_tokens: 8000,
-				description:
-					'Most intelligent model, best for complex reasoning and coding tasks',
-			},
-			'claude-4-opus': {
-				name: 'claude-4-opus',
-				display_name: 'Claude 4 Opus',
-				context_length: 200000,
-				input_cost_per_1k: 0.015,
-				output_cost_per_1k: 0.075,
+				input_cost_per_1k: 0.005,
+				output_cost_per_1k: 0.025,
 				supports_tools: true,
 				max_output_tokens: 8000,
 				description:
@@ -85,17 +74,6 @@ const ModelDefinitions = {
 			'claude-4-5-sonnet': {
 				name: 'claude-4-5-sonnet',
 				display_name: 'Claude 4.5 Sonnet',
-				context_length: 200000,
-				input_cost_per_1k: 0.003,
-				output_cost_per_1k: 0.015,
-				supports_tools: true,
-				max_output_tokens: 8000,
-				description:
-					'Most intelligent model, best for complex reasoning and coding tasks',
-			},
-			'claude-4-sonnet': {
-				name: 'claude-4-sonnet',
-				display_name: 'Claude 4 Sonnet',
 				context_length: 200000,
 				input_cost_per_1k: 0.003,
 				output_cost_per_1k: 0.015,
@@ -114,18 +92,7 @@ const ModelDefinitions = {
 				max_output_tokens: 8000,
 				description:
 					'Fastest and most cost-effective model, good for simple tasks',
-			},
-			'claude-4-3-haiku': {
-				name: 'claude-4-5-haiku',
-				display_name: 'Claude 4.5 Haiku',
-				context_length: 200000,
-				input_cost_per_1k: 0.0008,
-				output_cost_per_1k: 0.004,
-				supports_tools: true,
-				max_output_tokens: 8000,
-				description:
-					'Fastest and most cost-effective model, good for simple tasks',
-			},
+			}
 		},
 	},
 	google: {
