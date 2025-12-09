@@ -20,7 +20,7 @@ Whether you want to use our backend service or connect directly to your favorite
 ## 📦 Installation
 
 ```bash
-npm install --global @9octopus/octopus-cli
+npm install --global @9octopus/9octopus-cli
 ```
 
 ## 🛠️ Usage
