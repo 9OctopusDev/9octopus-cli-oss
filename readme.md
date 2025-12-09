@@ -46,7 +46,7 @@ export GROK_API_KEY=your_grok_api_key
 Start the interactive chat session:
 
 ```bash
-octopus-cli
+9octopus-cli
 ```
 
 ### 3. In-Chat Commands
