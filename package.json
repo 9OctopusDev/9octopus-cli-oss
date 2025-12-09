@@ -1,6 +1,6 @@
 {
-	"name": "@9octopus/octopus-cli",
-	"version": "0.1.1",
+	"name": "@9octopus/9octopus-cli",
+	"version": "0.2.0",
 	"description": "A powerful, open-source AI coding agent for your terminal. Connect directly to LLMs or use our backend service.",
 	"keywords": [
 		"ai",

@@ -20,7 +20,7 @@ Whether you want to use our backend service or connect directly to your favorite
 ## 📦 Installation
 
 ```bash
-npm install --global 9octopus-cli-oss
+npm install --global @9octopus/9octopus-cli
 ```
 
 ## 🛠️ Usage
@@ -46,7 +46,7 @@ export GROK_API_KEY=your_grok_api_key
 Start the interactive chat session:
 
 ```bash
-9octopus-cli-oss
+9octopus-cli
 ```
 
 ### 3. In-Chat Commands
