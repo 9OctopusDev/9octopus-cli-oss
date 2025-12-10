@@ -96,7 +96,7 @@ const DiffPreview: React.FC<DiffPreviewProps> = ({
 		<Box flexDirection="column" marginTop={1}>
 			<Box flexDirection="row" alignItems="center">
 				<Text color="cyan" bold>
-					📄 Preview: {diff.summary}
+					Preview: {diff.summary}
 				</Text>
 				{canCollapse && (
 					<Text color="gray" dimColor>
@@ -109,8 +109,8 @@ const DiffPreview: React.FC<DiffPreviewProps> = ({
 			{shouldShowContent && (
 				<Box
 					flexDirection="column"
-					borderStyle="round"
-					borderColor="gray"
+					borderStyle="single"
+					borderColor="white"
 					paddingX={1}
 					marginTop={1}
 				>

@@ -385,15 +385,15 @@ const InputComponent: React.FC<InputComponentProps> = ({
 		<Box flexDirection="column" width="100%" marginTop={0} paddingTop={0}>
 			<Box
 				flexDirection="column"
-				borderStyle="round"
-				borderColor="cyan"
+				borderStyle="single"
+				borderColor="white"
 				paddingX={1}
 				paddingY={0}
 				width="100%"
 			>
 				{/* Prompt indicator with TextInput on same line	 */}
 				<Box flexDirection="row" width="100%">
-					<Text color="cyan">{'>'} </Text>
+					<Text color="white">{'>'} </Text>
 					<Box flexGrow={1}>
 						<TextInput
 							value={inputMessage}
@@ -422,7 +422,7 @@ const InputComponent: React.FC<InputComponentProps> = ({
 					{autocomplete.map((item, index) => (
 						<Text
 							key={item.name}
-							color={index === selectedIndex ? 'cyan' : 'blue'}
+							color={index === selectedIndex ? 'cyan' : 'white'}
 						>
 							{index === selectedIndex ? '► ' : '  '}/{item.name} -{' '}
 							{item.description}
@@ -433,18 +433,18 @@ const InputComponent: React.FC<InputComponentProps> = ({
 
 			{/* Status bar - always visible at consistent position */}
 			<Box marginLeft={2} marginTop={1} flexDirection="row" gap={4}>
-				{gitBranch && <Text color="gray">Branch: {gitBranch}</Text>}
-				<Text color="gray">
+				{gitBranch && <Text color="white">Branch: {gitBranch}</Text>}
+				<Text color="white">
 					Session: {sessionManager.getSessionId().slice(-8)}
 				</Text>
 				{modelManager.hasDefaultModel() && (
-					<Text color="green">
+					<Text color="white">
 						Model:{' '}
 						{modelManager.formatModelDisplay(modelManager.getDefaultModel()!)}
 					</Text>
 				)}
 				{!modelManager.hasDefaultModel() && (
-					<Text color="yellow">Model: None (use /models set to configure)</Text>
+					<Text color="red">Model: None (use /models set to configure)</Text>
 				)}
 				<TokenUsageDisplay
 					compact={true}

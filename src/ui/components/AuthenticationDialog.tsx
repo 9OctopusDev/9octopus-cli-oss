@@ -31,21 +31,21 @@ const AuthenticationDialog: React.FC<AuthenticationDialogProps> = ({
 	return (
 		<Box
 			flexDirection="column"
-			borderStyle="round"
-			borderColor="cyan"
+			borderStyle="single"
+			borderColor="white"
 			paddingX={2}
 			paddingY={1}
 			marginY={1}
 		>
 			<Box marginBottom={1}>
-				<Text bold color="cyan">
+				<Text bold color="white">
 					🔐 Authentication {status === 'success' ? 'Complete' : 'Required'}
 				</Text>
 			</Box>
 
 			{status === 'initializing' && (
 				<Box>
-					<Text color="yellow">
+					<Text color="white">
 						<Spinner type="dots" /> Initializing authentication...
 					</Text>
 				</Box>
@@ -53,14 +53,14 @@ const AuthenticationDialog: React.FC<AuthenticationDialogProps> = ({
 
 			{authMode === 'device' && deviceInfo && status !== 'initializing' && (
 				<Box flexDirection="column" gap={1}>
-					<Box borderStyle="single" borderColor="yellow" paddingX={1}>
+					<Box borderStyle="single" borderColor="white" paddingX={1}>
 						<Box flexDirection="column">
-							<Text bold color="yellow">
+							<Text bold color="white">
 								Device Authentication Steps:
 							</Text>
 							<Text> </Text>
 							<Text>1. Open this URL in your browser:</Text>
-							<Text color="cyan"> {deviceInfo.verificationUri}</Text>
+							<Text color="white"> {deviceInfo.verificationUri}</Text>
 							<Text> </Text>
 							<Text>2. Enter this code:</Text>
 							<Box paddingLeft={3}>
@@ -78,10 +78,10 @@ const AuthenticationDialog: React.FC<AuthenticationDialogProps> = ({
 
 			{authMode === 'browser' && status === 'waiting' && (
 				<Box flexDirection="column">
-					<Text color="yellow">
+					<Text color="white">
 						<Spinner type="dots" /> Opening browser for authentication...
 					</Text>
-					<Text color="dim">
+					<Text color="white">
 						Please complete the authentication in your browser
 					</Text>
 				</Box>
@@ -89,10 +89,10 @@ const AuthenticationDialog: React.FC<AuthenticationDialogProps> = ({
 
 			{status === 'polling' && (
 				<Box>
-					<Text color="yellow">
+					<Text color="white">
 						<Spinner type="dots" /> Waiting for authentication...
 					</Text>
-					{statusMessage && <Text color="dim"> {statusMessage}</Text>}
+					{statusMessage && <Text color="white"> {statusMessage}</Text>}
 				</Box>
 			)}
 
