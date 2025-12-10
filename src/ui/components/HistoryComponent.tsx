@@ -14,9 +14,9 @@ const HistoryComponent: React.FC<{history: ConversationMessage[]}> = ({
 	const getRoleColor = (role: MessageRole) => {
 		switch (role) {
 			case 'user':
-				return 'green';
+				return 'white';
 			case 'assistant':
-				return 'blue';
+				return 'white';
 			case 'system':
 				return 'gray';
 			default:

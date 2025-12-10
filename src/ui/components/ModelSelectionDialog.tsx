@@ -118,14 +118,14 @@ const ModelSelectionDialog: React.FC<ModelSelectionDialogProps> = ({
 		return (
 			<Box
 				flexDirection="column"
-				borderStyle="round"
-				borderColor="cyan"
+				borderStyle="single"
+				borderColor="white"
 				padding={1}
 			>
-				<Text color="cyan" bold>
+				<Text color="white" bold>
 					Loading Available Models...
 				</Text>
-				<Text color="gray">
+				<Text color="white">
 					Please wait while we fetch the list of available models.
 				</Text>
 			</Box>
@@ -136,7 +136,7 @@ const ModelSelectionDialog: React.FC<ModelSelectionDialogProps> = ({
 		return (
 			<Box
 				flexDirection="column"
-				borderStyle="round"
+				borderStyle="single"
 				borderColor="red"
 				padding={1}
 			>
@@ -145,11 +145,11 @@ const ModelSelectionDialog: React.FC<ModelSelectionDialogProps> = ({
 				</Text>
 				<Text color="white">{error}</Text>
 				<Box marginTop={1}>
-					<Text color="gray">
+					<Text color="white">
 						Press ESC to cancel or try using the manual format:
 					</Text>
 				</Box>
-				<Text color="blue">
+				<Text color="white">
 					/models default set &lt;provider&gt; &lt;model&gt;
 				</Text>
 			</Box>
@@ -159,15 +159,15 @@ const ModelSelectionDialog: React.FC<ModelSelectionDialogProps> = ({
 	return (
 		<Box
 			flexDirection="column"
-			borderStyle="round"
-			borderColor="cyan"
+			borderStyle="single"
+			borderColor="white"
 			padding={1}
 		>
-			<Text color="cyan" bold>
+			<Text color="white" bold>
 				Select Default Model
 			</Text>
 			<Box marginBottom={1}>
-				<Text color="gray">
+				<Text color="white">
 					Choose a model to set as your default. Use ↑↓ arrows to navigate,
 					Enter to select, ESC to cancel.
 				</Text>
@@ -189,14 +189,14 @@ const ModelSelectionDialog: React.FC<ModelSelectionDialogProps> = ({
 						);
 					})}
 				{models.length > 10 && (
-					<Text color="gray">
+					<Text color="white">
 						... ({selectedIndex + 1} of {models.length})
 					</Text>
 				)}
 			</Box>
 
 			<Box marginTop={1}>
-				<Text color="gray">Total: {models.length} models available</Text>
+				<Text color="white">Total: {models.length} models available</Text>
 			</Box>
 		</Box>
 	);

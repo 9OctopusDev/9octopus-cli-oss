@@ -6,13 +6,13 @@ const LoadingComponent: React.FC = () => {
 	return (
 		<Box>
 			<Text>
-				<Text color="green">
+				<Text color="white">
 					<Spinner type="star" />
 				</Text>
-				<Text color="green">
+				<Text color="white">
 					<Spinner type="star" />
 				</Text>
-				<Text color="green">
+				<Text color="white">
 					<Spinner type="star" />
 				</Text>
 			</Text>
